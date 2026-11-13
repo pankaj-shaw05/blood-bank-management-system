@@ -447,10 +447,10 @@ def signup_view(request):
                     city=cd['city'],
                     address=cd['address'],
                     is_available=True,
-                    verified=True
+                    verified=False
                 )
                 login(request, user)
-                messages.success(request, f"Welcome to LifeStream! Your donor account is now active.")
+                messages.success(request, f"Welcome to LifeStream! Your donor account is registered. Verification status: Pending Medical Review.")
                 return redirect('dashboard_donor')
             else:
                 role = 'DONOR'
@@ -487,10 +487,10 @@ def signup_view(request):
                     blood_bank_status=cd['blood_bank_status'],
                     latitude=22.8015,  # Default Jamshedpur center
                     longitude=86.1796,
-                    verified_inside_geofence=True
+                    verified_inside_geofence=False
                 )
                 login(request, user)
-                messages.success(request, f"Welcome! Hospital portal account created for {cd['hospital_name']}.")
+                messages.success(request, f"Welcome! Hospital registration submitted for {cd['hospital_name']}. Verification status: Pending Health Authority Review.")
                 return redirect('dashboard_hospital')
             else:
                 role = 'HOSPITAL'
@@ -756,11 +756,22 @@ def dashboard_admin(request):
         return redirect('dashboard_redirect')
 
     total_donors = DonorProfile.objects.count()
+    verified_donors_count = DonorProfile.objects.filter(verified=True).count()
+    pending_donors_count = DonorProfile.objects.filter(verified=False).count()
+
     total_hospitals = Hospital.objects.count()
+    verified_hospitals_count = Hospital.objects.filter(verified_inside_geofence=True).count()
+    pending_hospitals_count = Hospital.objects.filter(verified_inside_geofence=False).count()
+
     total_requests = BloodRequest.objects.count()
     pending_requests = BloodRequest.objects.filter(status='Urgent Needed').count()
     
     total_inventory = BloodInventory.objects.aggregate(total=Sum('units'))['total'] or 0
+
+    pending_donors = DonorProfile.objects.filter(verified=False).order_by('-created_at')
+    pending_hospitals = Hospital.objects.filter(verified_inside_geofence=False).order_by('-created_at')
+    all_donors = DonorProfile.objects.all().order_by('-created_at')[:40]
+    all_hospitals = Hospital.objects.all().order_by('-created_at')[:40]
 
     recent_requests = BloodRequest.objects.all().order_by('-created_at')[:25]
     inventory_items = BloodInventory.objects.all().order_by('blood_group')
@@ -790,7 +801,15 @@ def dashboard_admin(request):
 
     context = {
         'total_donors': total_donors,
+        'verified_donors_count': verified_donors_count,
+        'pending_donors_count': pending_donors_count,
         'total_hospitals': total_hospitals,
+        'verified_hospitals_count': verified_hospitals_count,
+        'pending_hospitals_count': pending_hospitals_count,
+        'pending_donors': pending_donors,
+        'pending_hospitals': pending_hospitals,
+        'all_donors': all_donors,
+        'all_hospitals': all_hospitals,
         'total_requests': total_requests,
         'pending_requests': pending_requests,
         'total_inventory': total_inventory,
@@ -947,6 +966,78 @@ def delete_blood_request(request, req_id):
             messages.error(request, "Permission denied. Only hospital authorities or system administrators can delete this requisition.")
         return redirect(request.META.get('HTTP_REFERER', 'request_blood'))
     return redirect('request_blood')
+
+
+@login_required
+def toggle_donor_verification(request, donor_id):
+    """Admin-only: Toggle medical verification for a donor"""
+    is_admin = request.user.is_superuser or (getattr(request.user, 'profile', None) and request.user.profile.role == 'ADMIN')
+    if not is_admin:
+        messages.error(request, "Permission denied. Admin privileges required.")
+        return redirect('dashboard_redirect')
+
+    if request.method == 'POST':
+        donor = get_object_or_404(DonorProfile, id=donor_id)
+        donor.verified = not donor.verified
+        donor.save()
+        status_label = "VERIFIED" if donor.verified else "UNVERIFIED (Pending Review)"
+        messages.success(request, f"Donor {donor.full_name} status updated to {status_label}.")
+    return redirect(request.META.get('HTTP_REFERER', 'dashboard_admin'))
+
+
+@login_required
+def delete_donor(request, donor_id):
+    """Admin-only: Permanently delete a donor and linked account"""
+    is_admin = request.user.is_superuser or (getattr(request.user, 'profile', None) and request.user.profile.role == 'ADMIN')
+    if not is_admin:
+        messages.error(request, "Permission denied. Admin privileges required.")
+        return redirect('dashboard_redirect')
+
+    if request.method == 'POST':
+        donor = get_object_or_404(DonorProfile, id=donor_id)
+        donor_name = donor.full_name
+        linked_user = donor.user
+        donor.delete()
+        if linked_user and not (linked_user.is_superuser or (hasattr(linked_user, 'profile') and linked_user.profile.role == 'ADMIN')):
+            linked_user.delete()
+        messages.success(request, f"Donor {donor_name} has been permanently deleted from the database.")
+    return redirect(request.META.get('HTTP_REFERER', 'dashboard_admin'))
+
+
+@login_required
+def toggle_hospital_verification(request, hospital_id):
+    """Admin-only: Toggle accreditation & verification for a healthcare facility"""
+    is_admin = request.user.is_superuser or (getattr(request.user, 'profile', None) and request.user.profile.role == 'ADMIN')
+    if not is_admin:
+        messages.error(request, "Permission denied. Admin privileges required.")
+        return redirect('dashboard_redirect')
+
+    if request.method == 'POST':
+        hospital = get_object_or_404(Hospital, id=hospital_id)
+        hospital.verified_inside_geofence = not hospital.verified_inside_geofence
+        hospital.save()
+        status_label = "VERIFIED & ACCREDITED" if hospital.verified_inside_geofence else "PENDING APPROVAL"
+        messages.success(request, f"Healthcare facility {hospital.name} status updated to {status_label}.")
+    return redirect(request.META.get('HTTP_REFERER', 'dashboard_admin'))
+
+
+@login_required
+def delete_hospital(request, hospital_id):
+    """Admin-only: Permanently delete a healthcare facility and linked account"""
+    is_admin = request.user.is_superuser or (getattr(request.user, 'profile', None) and request.user.profile.role == 'ADMIN')
+    if not is_admin:
+        messages.error(request, "Permission denied. Admin privileges required.")
+        return redirect('dashboard_redirect')
+
+    if request.method == 'POST':
+        hospital = get_object_or_404(Hospital, id=hospital_id)
+        hosp_name = hospital.name
+        linked_user = hospital.user
+        hospital.delete()
+        if linked_user and not (linked_user.is_superuser or (hasattr(linked_user, 'profile') and linked_user.profile.role == 'ADMIN')):
+            linked_user.delete()
+        messages.success(request, f"Healthcare facility {hosp_name} has been permanently deleted from the database.")
+    return redirect(request.META.get('HTTP_REFERER', 'dashboard_admin'))
 
 
 def api_hospitals(request):

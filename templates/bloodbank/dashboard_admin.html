@@ -30,25 +30,37 @@
         <!-- KPI SUMMARY CARDS -->
         <div class="row g-3 mb-4">
             <div class="col-6 col-lg-3">
-                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
-                    <span class="text-muted small fw-bold text-uppercase d-block mb-1">Total Verified Donors</span>
+                <div class="card border-0 shadow-sm rounded-4 p-3 p-md-4 bg-white h-100">
+                    <span class="text-muted small fw-bold text-uppercase d-block mb-1">Registered Donors</span>
                     <h2 class="fw-bold text-dark mb-0">{{ total_donors }}</h2>
-                    <a href="/admin/bloodbank/donorprofile/" target="_blank" class="small text-danger text-decoration-none mt-2 d-inline-block">
-                        Manage Donors &rarr;
+                    <div class="small mt-1 text-truncate">
+                        <span class="text-success fw-bold"><i class="bi bi-patch-check-fill me-1"></i>{{ verified_donors_count }} Verified</span>
+                        {% if pending_donors_count > 0 %}
+                        &bull; <span class="badge bg-warning text-dark rounded-pill">{{ pending_donors_count }} Pending</span>
+                        {% endif %}
+                    </div>
+                    <a href="#adminDonorsSection" class="small text-danger text-decoration-none mt-2 d-inline-block fw-semibold">
+                        Manage Donors &darr;
                     </a>
                 </div>
             </div>
             <div class="col-6 col-lg-3">
-                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
-                    <span class="text-muted small fw-bold text-uppercase d-block mb-1">Geofenced Hospitals</span>
+                <div class="card border-0 shadow-sm rounded-4 p-3 p-md-4 bg-white h-100">
+                    <span class="text-muted small fw-bold text-uppercase d-block mb-1">Healthcare Facilities</span>
                     <h2 class="fw-bold text-primary mb-0">{{ total_hospitals }}</h2>
-                    <a href="/admin/bloodbank/hospital/" target="_blank" class="small text-primary text-decoration-none mt-2 d-inline-block">
-                        Manage Facilities &rarr;
+                    <div class="small mt-1 text-truncate">
+                        <span class="text-success fw-bold"><i class="bi bi-shield-check me-1"></i>{{ verified_hospitals_count }} Accredited</span>
+                        {% if pending_hospitals_count > 0 %}
+                        &bull; <span class="badge bg-warning text-dark rounded-pill">{{ pending_hospitals_count }} Pending</span>
+                        {% endif %}
+                    </div>
+                    <a href="#adminHospitalsSection" class="small text-primary text-decoration-none mt-2 d-inline-block fw-semibold">
+                        Manage Facilities &darr;
                     </a>
                 </div>
             </div>
             <div class="col-6 col-lg-3">
-                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                <div class="card border-0 shadow-sm rounded-4 p-3 p-md-4 bg-white h-100">
                     <span class="text-muted small fw-bold text-uppercase d-block mb-1">Central Blood Stock</span>
                     <h2 class="fw-bold text-danger mb-0">{{ total_inventory }} <small class="fs-6 text-muted">units</small></h2>
                     <a href="/admin/bloodbank/bloodinventory/" target="_blank" class="small text-danger text-decoration-none mt-2 d-inline-block">
@@ -93,6 +105,38 @@
                 </div>
             </div>
         </div>
+
+        <!-- PENDING REGISTRATIONS APPROVAL ACTION ALERT -->
+        {% if pending_donors_count > 0 or pending_hospitals_count > 0 %}
+        <div class="alert alert-warning border-warning border-2 rounded-4 p-3 p-md-4 mb-4 shadow-sm bg-warning bg-opacity-10">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px; font-size: 1.3rem;">
+                        <i class="bi bi-shield-exclamation"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-1 text-dark">Action Required: Registrations Awaiting Admin Verification</h5>
+                        <div class="small text-muted">
+                            {% if pending_hospitals_count > 0 %}
+                                <span class="badge bg-danger text-white rounded-pill me-2"><i class="bi bi-hospital me-1"></i>{{ pending_hospitals_count }} Hospital{{ pending_hospitals_count|pluralize }} Pending Accreditation</span>
+                            {% endif %}
+                            {% if pending_donors_count > 0 %}
+                                <span class="badge bg-dark text-white rounded-pill"><i class="bi bi-person-heart me-1"></i>{{ pending_donors_count }} Donor{{ pending_donors_count|pluralize }} Pending Medical Review</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    {% if pending_hospitals_count > 0 %}
+                    <a href="#adminHospitalsSection" class="btn btn-sm btn-danger rounded-pill fw-bold text-nowrap">Approve Hospitals &darr;</a>
+                    {% endif %}
+                    {% if pending_donors_count > 0 %}
+                    <a href="#adminDonorsSection" class="btn btn-sm btn-dark rounded-pill fw-bold text-nowrap">Verify Donors &darr;</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
 
         <!-- INTERACTIVE BI ANALYTICS & CHARTS (FEATURE 2) -->
         <div class="row g-4 mb-4">
@@ -285,6 +329,189 @@
                             <td colspan="6" class="text-center py-4 text-muted">
                                 No active blood requisitions in database.
                             </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- HEALTHCARE FACILITIES MANAGEMENT & ACCREDITATION -->
+        <div class="card border-0 shadow-sm rounded-4 p-3 p-md-4 bg-white mb-4" id="adminHospitalsSection">
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 mb-3">
+                <div>
+                    <h5 class="fw-bold mb-0 text-break">
+                        <i class="bi bi-hospital text-primary me-2"></i>Healthcare Facilities &amp; Accreditation Management
+                    </h5>
+                    <small class="text-muted">Review, approve, suspend, or permanently remove hospital facilities across East Singhbhum.</small>
+                </div>
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <span class="badge bg-primary rounded-pill px-3 py-1">{{ total_hospitals }} Total</span>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1">{{ verified_hospitals_count }} Accredited</span>
+                    {% if pending_hospitals_count > 0 %}
+                    <span class="badge bg-warning text-dark rounded-pill px-3 py-1">{{ pending_hospitals_count }} Awaiting Approval</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Facility Name &amp; ID</th>
+                            <th>Locality &amp; Address</th>
+                            <th>Beds &amp; Blood Desk</th>
+                            <th>Accreditation Status</th>
+                            <th>Admin Verification &amp; Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for h in all_hospitals %}
+                        <tr class="{% if not h.verified_inside_geofence %}table-warning bg-opacity-25{% endif %}">
+                            <td>
+                                <strong>{{ h.name }}</strong>
+                                <small class="text-muted d-block font-monospace">{{ h.hospital_id }}</small>
+                                <span class="badge bg-light text-dark border small">{{ h.category|default:"Healthcare Facility" }}</span>
+                            </td>
+                            <td>
+                                <div><i class="bi bi-geo-alt text-danger me-1"></i>{{ h.locality }}</div>
+                                <small class="text-muted">{{ h.address|truncatechars:45 }}</small>
+                                <small class="text-muted d-block"><i class="bi bi-telephone me-1"></i>{{ h.phone }}</small>
+                            </td>
+                            <td>
+                                <div><strong>{{ h.beds }}</strong> Beds</div>
+                                <small class="text-muted">{{ h.blood_bank_status|default:"Licensed Storage" }}</small>
+                            </td>
+                            <td>
+                                {% if h.verified_inside_geofence %}
+                                    <span class="badge bg-success rounded-pill px-2 py-1"><i class="bi bi-shield-check me-1"></i>Accredited &amp; Active</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark rounded-pill px-2 py-1"><i class="bi bi-hourglass-split me-1"></i>Pending Approval</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="d-flex flex-wrap align-items-center gap-2">
+                                    <!-- Toggle Verification / Approval Button -->
+                                    <form method="POST" action="{% url 'toggle_hospital_verification' h.id %}" class="d-inline">
+                                        {% csrf_token %}
+                                        {% if h.verified_inside_geofence %}
+                                            <button type="submit" class="btn btn-sm btn-outline-warning rounded-pill px-2 py-1 text-nowrap" title="Suspend hospital accreditation">
+                                                <i class="bi bi-pause-circle me-1"></i>Suspend
+                                            </button>
+                                        {% else %}
+                                            <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 py-1 fw-bold text-nowrap" title="Approve and accredit this facility">
+                                                <i class="bi bi-shield-check me-1"></i>Approve Facility
+                                            </button>
+                                        {% endif %}
+                                    </form>
+
+                                    <!-- Permanent Delete Button -->
+                                    <form method="POST" action="{% url 'delete_hospital' h.id %}" class="d-inline" onsubmit="return confirm('⚠️ ARE YOU SURE? Permanently delete healthcare facility &quot;{{ h.name }}&quot;? This cannot be undone.');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-2 py-1 text-nowrap" title="Permanently delete hospital">
+                                            <i class="bi bi-trash"></i> Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">No hospitals registered yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- DONOR REGISTRY & MEDICAL VERIFICATION MANAGEMENT -->
+        <div class="card border-0 shadow-sm rounded-4 p-3 p-md-4 bg-white mb-4" id="adminDonorsSection">
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 mb-3">
+                <div>
+                    <h5 class="fw-bold mb-0 text-break">
+                        <i class="bi bi-people-fill text-danger me-2"></i>Blood Donors Registry &amp; Medical Verification
+                    </h5>
+                    <small class="text-muted">Review, medically verify, suspend, or permanently remove registered blood donors.</small>
+                </div>
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <span class="badge bg-danger rounded-pill px-3 py-1">{{ total_donors }} Total</span>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1">{{ verified_donors_count }} Verified</span>
+                    {% if pending_donors_count > 0 %}
+                    <span class="badge bg-warning text-dark rounded-pill px-3 py-1">{{ pending_donors_count }} Pending Medical Check</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Donor Name &amp; ID</th>
+                            <th>Blood Group</th>
+                            <th>Age &amp; Gender</th>
+                            <th>Contact &amp; City</th>
+                            <th>Donations &amp; Status</th>
+                            <th>Medical Verification</th>
+                            <th>Admin Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in all_donors %}
+                        <tr class="{% if not d.verified %}table-warning bg-opacity-25{% endif %}">
+                            <td>
+                                <strong>{{ d.full_name }}</strong>
+                                <small class="text-muted d-block font-monospace">DONOR-ES-{{ d.id|stringformat:"04d" }}</small>
+                            </td>
+                            <td><span class="badge bg-danger rounded-pill fs-6 px-3 py-1">{{ d.blood_group }}</span></td>
+                            <td>{{ d.age }} yrs &bull; {{ d.gender }}</td>
+                            <td>
+                                <a href="tel:{{ d.phone }}" class="text-decoration-none fw-bold text-success"><i class="bi bi-telephone me-1"></i>{{ d.phone }}</a>
+                                <small class="text-muted d-block">{{ d.city }}</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-dark rounded-pill">{{ d.total_donations }} donation{{ d.total_donations|pluralize }}</span>
+                                <small class="d-block mt-1 {% if d.is_available %}text-success fw-bold{% else %}text-muted{% endif %}">
+                                    <i class="bi {% if d.is_available %}bi-circle-fill text-success{% else %}bi-moon-fill text-secondary{% endif %} me-1" style="font-size: 0.55rem;"></i>
+                                    {% if d.is_available %}Ready to Donate{% else %}Off-Duty{% endif %}
+                                </small>
+                            </td>
+                            <td>
+                                {% if d.verified %}
+                                    <span class="badge bg-success rounded-pill px-2 py-1"><i class="bi bi-patch-check-fill me-1"></i>Medically Verified</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark rounded-pill px-2 py-1"><i class="bi bi-hourglass-split me-1"></i>Pending Review</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="d-flex flex-wrap align-items-center gap-2">
+                                    <!-- Toggle Donor Verification Button -->
+                                    <form method="POST" action="{% url 'toggle_donor_verification' d.id %}" class="d-inline">
+                                        {% csrf_token %}
+                                        {% if d.verified %}
+                                            <button type="submit" class="btn btn-sm btn-outline-secondary rounded-pill px-2 py-1 text-nowrap" title="Mark donor as unverified">
+                                                <i class="bi bi-x-circle me-1"></i>Unverify
+                                            </button>
+                                        {% else %}
+                                            <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 py-1 fw-bold text-nowrap" title="Medically verify donor">
+                                                <i class="bi bi-patch-check-fill me-1"></i>Verify Donor
+                                            </button>
+                                        {% endif %}
+                                    </form>
+
+                                    <!-- Permanent Delete Button -->
+                                    <form method="POST" action="{% url 'delete_donor' d.id %}" class="d-inline" onsubmit="return confirm('⚠️ ARE YOU SURE? Permanently delete donor &quot;{{ d.full_name }}&quot;?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-2 py-1 text-nowrap" title="Permanently delete donor">
+                                            <i class="bi bi-trash"></i> Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">No donors registered in database.</td>
                         </tr>
                         {% endfor %}
                     </tbody>

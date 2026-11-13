@@ -15,10 +15,11 @@ class UserProfileAdmin(admin.ModelAdmin):
 
 @admin.register(DonorProfile)
 class DonorProfileAdmin(admin.ModelAdmin):
-    list_display = ('full_name', 'blood_group', 'age', 'gender', 'phone', 'city', 'is_available', 'total_donations', 'last_donation_date', 'verified')
-    list_filter = ('blood_group', 'is_available', 'gender', 'city', 'verified')
+    list_display = ('full_name', 'blood_group', 'age', 'gender', 'phone', 'city', 'verified', 'is_available', 'total_donations', 'last_donation_date')
+    list_filter = ('verified', 'blood_group', 'is_available', 'gender', 'city')
     search_fields = ('full_name', 'phone', 'email', 'city', 'address')
-    actions = ['make_available', 'make_unavailable', 'verify_donors']
+    list_editable = ('verified', 'is_available')
+    actions = ['verify_donors', 'unverify_donors', 'make_available', 'make_unavailable', 'delete_selected']
 
     def make_available(self, request, queryset):
         queryset.update(is_available=True)
@@ -29,15 +30,33 @@ class DonorProfileAdmin(admin.ModelAdmin):
     make_unavailable.short_description = "Mark selected donors as Unavailable"
 
     def verify_donors(self, request, queryset):
-        queryset.update(verified=True)
+        count = queryset.update(verified=True)
+        self.message_user(request, f"{count} donor(s) medically verified.")
     verify_donors.short_description = "Verify selected donors"
+
+    def unverify_donors(self, request, queryset):
+        count = queryset.update(verified=False)
+        self.message_user(request, f"{count} donor(s) marked as Unverified (Pending Review).")
+    unverify_donors.short_description = "Mark selected donors as Unverified / Pending"
 
 
 @admin.register(Hospital)
 class HospitalAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category', 'locality', 'beds', 'has_blood_bank', 'blood_bank_status', 'available_units', 'phone')
-    list_filter = ('category', 'has_blood_bank', 'locality')
+    list_display = ('name', 'category', 'locality', 'beds', 'verified_inside_geofence', 'has_blood_bank', 'blood_bank_status', 'available_units', 'phone')
+    list_filter = ('verified_inside_geofence', 'category', 'has_blood_bank', 'locality')
     search_fields = ('name', 'locality', 'address', 'phone')
+    list_editable = ('verified_inside_geofence',)
+    actions = ['approve_hospitals', 'suspend_hospitals', 'delete_selected']
+
+    def approve_hospitals(self, request, queryset):
+        count = queryset.update(verified_inside_geofence=True)
+        self.message_user(request, f"{count} healthcare facility(s) approved and accredited.")
+    approve_hospitals.short_description = "Approve & Accredit selected facilities"
+
+    def suspend_hospitals(self, request, queryset):
+        count = queryset.update(verified_inside_geofence=False)
+        self.message_user(request, f"{count} healthcare facility(s) suspended / marked pending.")
+    suspend_hospitals.short_description = "Suspend / Mark selected facilities as Pending"
 
 
 @admin.register(BloodInventory)

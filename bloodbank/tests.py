@@ -344,4 +344,51 @@ class BloodBankTestCase(TestCase):
         self.assertEqual(saved_req.required_date, datetime.date(2026, 11, 12))
         self.assertEqual(saved_req.requested_by, mgm_user)
 
+    def test_admin_toggle_verify_and_delete_donor(self):
+        """Verify that admin can verify/unverify and delete a donor"""
+        self.client.login(username='admin', password='adminpassword')
+        test_donor = DonorProfile.objects.create(
+            full_name='Verification Test Donor',
+            blood_group='O+',
+            phone='+91 99999 11111',
+            verified=False
+        )
+        self.assertFalse(test_donor.verified)
+
+        # 1. Admin verifies donor
+        toggle_res = self.client.post(reverse('toggle_donor_verification', args=[test_donor.id]))
+        self.assertEqual(toggle_res.status_code, 302)
+        test_donor.refresh_from_db()
+        self.assertTrue(test_donor.verified)
+
+        # 2. Admin deletes donor
+        del_res = self.client.post(reverse('delete_donor', args=[test_donor.id]))
+        self.assertEqual(del_res.status_code, 302)
+        self.assertFalse(DonorProfile.objects.filter(id=test_donor.id).exists())
+
+    def test_admin_toggle_verify_and_delete_hospital(self):
+        """Verify that admin can accredit/suspend and delete a hospital"""
+        self.client.login(username='admin', password='adminpassword')
+        test_hosp = Hospital.objects.create(
+            hospital_id='HOSP-TEST-ADMIN',
+            name='Test Clinic Admin Verification',
+            locality='Sakchi',
+            latitude=22.80,
+            longitude=86.18,
+            phone='+91 657 000000',
+            verified_inside_geofence=False
+        )
+        self.assertFalse(test_hosp.verified_inside_geofence)
+
+        # 1. Admin approves hospital
+        toggle_res = self.client.post(reverse('toggle_hospital_verification', args=[test_hosp.id]))
+        self.assertEqual(toggle_res.status_code, 302)
+        test_hosp.refresh_from_db()
+        self.assertTrue(test_hosp.verified_inside_geofence)
+
+        # 2. Admin deletes hospital
+        del_res = self.client.post(reverse('delete_hospital', args=[test_hosp.id]))
+        self.assertEqual(del_res.status_code, 302)
+        self.assertFalse(Hospital.objects.filter(id=test_hosp.id).exists())
+
 
