@@ -147,11 +147,11 @@
                             <span><i class="bi bi-inpatient text-primary me-1"></i>{{ h.beds }} Beds</span>
                         </div>
 
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-outline-danger btn-sm flex-fill" onclick="locateHospitalOnMap('{{ h.hospital_id }}', {{ h.latitude }}, {{ h.longitude }})">
+                        <div class="d-flex flex-wrap gap-2">
+                            <button class="btn btn-outline-danger btn-sm flex-fill text-nowrap" onclick="locateHospitalOnMap('{{ h.hospital_id }}', {{ h.latitude }}, {{ h.longitude }})">
                                 <i class="bi bi-geo-fill"></i> View on Map
                             </button>
-                            <button class="btn btn-primary-red btn-sm flex-fill" onclick="selectHospitalForRequest('{{ h.id }}', '{{ h.name|escapejs }}', '{{ h.locality|escapejs }}', '{{ h.phone|escapejs }}')">
+                            <button class="btn btn-primary-red btn-sm flex-fill text-nowrap" onclick="selectHospitalForRequest('{{ h.id }}', '{{ h.name|escapejs }}', '{{ h.locality|escapejs }}', '{{ h.phone|escapejs }}')">
                                 <i class="bi bi-pencil-square"></i> Select Facility
                             </button>
                         </div>
@@ -603,11 +603,11 @@
                                 </div>
                             </div>
 
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="badge bg-success-subtle text-success border border-success-subtle">
+                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                                <span class="badge bg-success-subtle text-success border border-success-subtle text-wrap text-start">
                                     <i class="bi bi-shield-check me-1"></i> Geofence Verified &bull; East Singhbhum
                                 </span>
-                                <div class="d-flex gap-2">
+                                <div class="d-flex flex-wrap gap-2">
                                     {% if logged_in_donor %}
                                     <button type="button" class="btn btn-danger btn-sm rounded-pill px-3 shadow-sm fw-bold" data-bs-toggle="modal" data-bs-target="#pledgeModal-{{ req.id }}">
                                         <i class="bi bi-heart-pulse-fill me-1"></i> I Can Donate

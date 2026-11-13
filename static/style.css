@@ -1899,13 +1899,20 @@ section.py-5 {
 }
 
 @media (max-width: 575.98px) {
-    .btn:not(.hero-action-btn):not(.btn-sm):not(.blood-circle-btn) {
+    .btn.w-100-mobile,
+    .cta-banner .btn,
+    .auth-form-container form > .btn-primary-red,
+    .auth-form-container form > .btn-danger {
         width: 100%;
     }
-    .hero-action-btn {
-        width: auto;
-        padding: 0.46rem 0.95rem;
-        font-size: 0.82rem;
+    .input-group .btn,
+    .btn-group .btn,
+    .d-flex:not(.flex-column) > .btn,
+    .dropdown .btn,
+    .hero-action-btn,
+    .btn-sm,
+    .blood-selector-btn {
+        width: auto !important;
     }
     .hero-title {
         font-size: 2.1rem;
@@ -2190,5 +2197,229 @@ section.py-5 {
 .stat-counter-box:hover {
     transform: translateY(-4px);
     box-shadow: var(--card-shadow-hover);
+}
+
+/* ============================================================
+   MASTER MOBILE & ALL-DEVICE RESPONSIVENESS SUITE (2026)
+   Fixes Box Overflow, Horizontal Spills, and Mobile Polish
+   ============================================================ */
+
+/* 1. Global Viewport & Container Containment */
+html, body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+    width: 100% !important;
+    position: relative;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+img, svg, video, canvas, iframe {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Ensure cards and wrappers never overflow their container */
+.card, .custom-card, .compat-card, .donor-smart-card, .auth-card,
+.hero-glass-search-card, .certificate-print-card {
+    max-width: 100% !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+}
+
+/* 2. Fluid Table Responsiveness */
+.table-responsive {
+    -webkit-overflow-scrolling: touch;
+    overflow-x: auto !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    border-radius: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.table-responsive > .table {
+    min-width: 580px;
+    margin-bottom: 0;
+}
+
+.table-responsive th, 
+.table-responsive td {
+    vertical-align: middle;
+}
+
+/* 3. Broadcast Console Logs Safe Wrapping */
+#broadcastConsoleLog,
+#adminBroadcastConsoleLog {
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+    white-space: pre-wrap !important;
+    font-size: 0.8rem !important;
+    max-width: 100% !important;
+}
+
+/* 4. Smart Card Mobile Containment */
+.donor-smart-card {
+    max-width: 100% !important;
+    min-height: auto !important;
+    overflow: hidden !important;
+}
+
+.donor-smart-card img.donor-qr-code-img {
+    max-width: 80px !important;
+    height: auto !important;
+}
+
+/* 5. Mobile Breakpoint (< 768px - Phones & Small Tablets) */
+@media (max-width: 767.98px) {
+    .container, .container-fluid {
+        padding-left: 14px !important;
+        padding-right: 14px !important;
+    }
+
+    /* Headings scaling */
+    h1, .display-4, .display-5 {
+        font-size: clamp(1.65rem, 6vw, 2.2rem) !important;
+    }
+    h2 {
+        font-size: clamp(1.4rem, 5vw, 1.85rem) !important;
+    }
+    h3 {
+        font-size: clamp(1.2rem, 4.5vw, 1.55rem) !important;
+    }
+
+    /* Hero Section mobile flow */
+    .hero-section {
+        height: auto !important;
+        min-height: 100vh;
+        padding: 4.5rem 0 3rem !important;
+    }
+    .hero-glass-search-card {
+        padding: 1.15rem 1rem !important;
+        margin-bottom: 1.25rem !important;
+    }
+
+    /* Blood Compatibility Matrix buttons */
+    .blood-selector-btn {
+        width: 46px !important;
+        height: 46px !important;
+        font-size: 0.9rem !important;
+    }
+    .compat-card {
+        padding: 1.25rem 1rem !important;
+    }
+
+    /* Donor Smart Card Mobile Tuning */
+    .donor-smart-card {
+        padding: 1rem !important;
+    }
+    .donor-smart-card h4 {
+        font-size: 1.15rem !important;
+    }
+    .donor-smart-card img.donor-qr-code-img {
+        width: 70px !important;
+        height: 70px !important;
+    }
+
+    /* Navbar items */
+    .navbar-brand-logo .logo-text-title {
+        font-size: 1.2rem;
+    }
+    .logo-icon-box {
+        width: 36px;
+        height: 36px;
+        font-size: 1.2rem;
+    }
+
+    /* Requisition and Hospital cards */
+    .hospital-item-card {
+        margin-bottom: 0.5rem;
+    }
+
+    /* Chatbot Window on mobile */
+    .lifebot-chat-window {
+        width: calc(100vw - 20px) !important;
+        right: 10px !important;
+        bottom: 75px !important;
+        height: calc(100vh - 100px) !important;
+        max-height: 520px !important;
+        border-radius: 1rem !important;
+    }
+}
+
+/* 6. Extra Small Screens (< 420px - Compact Phones like iPhone SE, Galaxy A series) */
+@media (max-width: 419.98px) {
+    .blood-selector-btn {
+        width: 40px !important;
+        height: 40px !important;
+        font-size: 0.82rem !important;
+    }
+
+    .donor-smart-card .rounded-circle[style*="32px"] {
+        width: 26px !important;
+        height: 26px !important;
+        font-size: 0.85rem !important;
+    }
+
+    .donor-smart-card strong[style*="font-size"] {
+        font-size: 0.82rem !important;
+    }
+
+    .donor-smart-card img[alt="{{ donor.full_name }}"] {
+        width: 50px !important;
+        height: 50px !important;
+    }
+
+    .donor-smart-card img.donor-qr-code-img {
+        width: 64px !important;
+        height: 64px !important;
+    }
+
+    .stat-counter-box h3 {
+        font-size: 1.25rem !important;
+    }
+
+    .badge {
+        font-size: 0.72rem !important;
+    }
+}
+
+/* 7. Tablet & Small Laptop Navigation Drawer Polish (< 992px) */
+@media (max-width: 991.98px) {
+    .main-navbar .navbar-nav {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        flex-wrap: wrap !important;
+        gap: 0.35rem !important;
+        padding-top: 0.75rem;
+        border-top: 1px solid var(--slate-200);
+        margin-top: 0.75rem;
+    }
+
+    .nav-link {
+        width: 100% !important;
+        padding: 0.65rem 1rem !important;
+        border-radius: 0.6rem;
+    }
+
+    #navAuthActions {
+        width: 100% !important;
+        margin-top: 0.75rem !important;
+        padding-top: 0.75rem;
+        border-top: 1px solid var(--slate-100);
+    }
+
+    #navAuthActions .dropdown,
+    #navAuthActions #userMenuDropdown {
+        width: 100% !important;
+        justify-content: space-between !important;
+    }
+
+    #navAuthActions .dropdown-menu {
+        width: 100% !important;
+    }
 }
 
