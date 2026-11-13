@@ -30,6 +30,42 @@ python manage.py test
 
 ---
 
+## ☁️ Deploying to Render (Production Setup)
+
+This project is 100% production-ready for **[Render](https://render.com/)**.
+
+### Option A: 1-Click Blueprint (Recommended)
+1. Push your repository to **GitHub** or **GitLab**.
+2. Open your [Render Dashboard](https://dashboard.render.com/) and click **New +** -> **Blueprint**.
+3. Select your repository. Render will automatically detect [`render.yaml`](render.yaml) and configure:
+   - Build Command: `bash build.sh`
+   - Start Command: `gunicorn lifestream_project.wsgi:application`
+   - Python Version: `3.11.9`
+   - Automatic migrations & initial verified seeding
+   - Secure random `SECRET_KEY` generation
+
+### Option B: Manual Web Service Setup
+1. On [Render](https://dashboard.render.com/), click **New +** -> **Web Service**.
+2. Connect your GitHub repository.
+3. Configure the settings:
+   - **Name**: `lifestream-bloodbank`
+   - **Region**: Singapore / Frankfurt / Oregon (any)
+   - **Branch**: `main`
+   - **Runtime**: `Python 3`
+   - **Build Command**: `bash build.sh`
+   - **Start Command**: `gunicorn lifestream_project.wsgi:application`
+   - **Instance Type**: `Free`
+4. In **Environment Variables**, add:
+   - `PYTHON_VERSION`: `3.11.9`
+   - `DJANGO_DEBUG`: `False`
+   - `SECRET_KEY`: *(click Generate or enter a secure 50+ character string)*
+   - `WEB_CONCURRENCY`: `4`
+   - *(Optional)* `DATABASE_URL`: *(Connect a Render PostgreSQL database URL if using PostgreSQL)*
+5. Click **Deploy Web Service**.
+   - Your live site will be ready in 2-3 minutes at `https://<your-app>.onrender.com`!
+
+---
+
 ## 🔐 Pre-Configured Demo Accounts
 
 | Role | Username | Password | Purpose |

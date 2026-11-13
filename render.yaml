@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: lifestream-bloodbank
+    runtime: python
+    buildCommand: "bash build.sh"
+    startCommand: "gunicorn lifestream_project.wsgi:application"
+    plan: free
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: WEB_CONCURRENCY
+        value: "4"

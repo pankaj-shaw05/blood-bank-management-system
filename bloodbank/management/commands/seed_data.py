@@ -1,3 +1,5 @@
+import os
+import datetime
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 from bloodbank.models import (
@@ -7,12 +9,23 @@ from bloodbank.models import (
 from bloodbank.data_defaults import (
     SEED_HOSPITALS, SEED_INVENTORY, SEED_CAMPS
 )
-import datetime
 
 class Command(BaseCommand):
     help = 'Purges old mock data and populates clean LifeStream database with verified hospitals, donor, inventory, and new admin account.'
 
-    def handle(self, *args, **kwargs):
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--if-empty',
+            action='store_true',
+            help='Only seed if database has no records (ideal for post-deploy initialization)',
+        )
+
+    def handle(self, *args, **options):
+        if options.get('if_empty'):
+            if User.objects.filter(is_superuser=True).exists() and Hospital.objects.exists():
+                self.stdout.write(self.style.SUCCESS("Database is already seeded with verified data. Skipping reseed."))
+                return
+
         self.stdout.write(self.style.NOTICE("Starting complete database clean and fresh reseed..."))
 
         # ------------------------------------------------------------
@@ -30,12 +43,16 @@ class Command(BaseCommand):
         self.stdout.write(self.style.WARNING("Purged all old requests, donation records, camps, profiles, and users."))
 
         # ------------------------------------------------------------
-        # 2. CREATE NEW SUPERUSER / ADMIN (id: admin, pass: admin)
+        # 2. CREATE NEW SUPERUSER / ADMIN
         # ------------------------------------------------------------
+        admin_uname = os.environ.get('DJANGO_SUPERUSER_USERNAME', 'admin')
+        admin_email = os.environ.get('DJANGO_SUPERUSER_EMAIL', 'admin@lifestream.org')
+        admin_pass = os.environ.get('DJANGO_SUPERUSER_PASSWORD', 'admin123')
+
         admin_user = User.objects.create_superuser(
-            username='admin',
-            email='admin@lifestream.org',
-            password='admin',
+            username=admin_uname,
+            email=admin_email,
+            password=admin_pass,
             first_name='System',
             last_name='Admin'
         )
@@ -45,7 +62,7 @@ class Command(BaseCommand):
             phone='+91 657-222-0000',
             city='Jamshedpur'
         )
-        self.stdout.write(self.style.SUCCESS("Created Superuser: username='admin' | password='admin'"))
+        self.stdout.write(self.style.SUCCESS(f"Created Superuser: username='{admin_uname}' | password='{admin_pass}'"))
 
         # ------------------------------------------------------------
         # 3. CREATE HOSPITAL USER ACCOUNTS & 8 VERIFIED HOSPITALS
