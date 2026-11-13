@@ -7,16 +7,16 @@
 <section class="py-5 bg-light min-vh-100">
     <div class="container">
         <!-- TOP PROFILE OVERVIEW BANNER -->
-        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 mb-4 bg-white border-start border-5 border-danger">
+        <div class="card border-0 shadow-sm rounded-4 p-3 p-md-5 mb-4 bg-white border-start border-5 border-danger">
             <div class="row g-4 align-items-center">
                 <div class="col-md-8 d-flex flex-wrap align-items-center gap-3">
-                    <img src="{{ donor.avatar_url }}" alt="{{ donor.full_name }}" class="rounded-circle border border-3 border-danger shadow-sm" style="width: 80px; height: 80px; object-fit: cover;">
-                    <div>
-                        <div class="d-flex align-items-center gap-2 mb-1">
-                            <h3 class="fw-bold text-dark mb-0">{{ donor.full_name }}</h3>
+                    <img src="{{ donor.avatar_url }}" alt="{{ donor.full_name }}" class="rounded-circle border border-3 border-danger shadow-sm flex-shrink-0" style="width: 80px; height: 80px; object-fit: cover;">
+                    <div class="min-w-0" style="min-width: 0;">
+                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                            <h3 class="fw-bold text-dark mb-0 text-break">{{ donor.full_name }}</h3>
                             <span class="badge bg-danger fs-5 px-3 py-1 rounded-pill">{{ donor.blood_group }}</span>
                         </div>
-                        <p class="text-muted small mb-0">
+                        <p class="text-muted small mb-0 text-break">
                             <i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ donor.city }}, East Singhbhum &bull; 
                             <i class="bi bi-telephone text-success me-1"></i>{{ donor.phone }}
                         </p>
@@ -27,12 +27,12 @@
                 <div class="col-md-4 text-md-end">
                     <div class="p-3 bg-light rounded-4 border d-inline-block text-start w-100 w-md-auto">
                         <span class="small text-muted d-block fw-bold mb-1">Emergency Availability:</span>
-                        <div class="d-flex align-items-center justify-content-between gap-3">
-                            <span class="badge {% if donor.is_available %}bg-success{% else %}bg-secondary{% endif %} fs-6 py-2 px-3 rounded-pill" id="availabilityStatusBadge">
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                            <span class="badge {% if donor.is_available %}bg-success{% else %}bg-secondary{% endif %} fs-6 py-2 px-3 rounded-pill text-wrap" id="availabilityStatusBadge">
                                 <i class="bi {% if donor.is_available %}bi-check-circle-fill{% else %}bi-moon-fill{% endif %} me-1"></i>
                                 <span id="availabilityStatusText">{% if donor.is_available %}Available for Emergency{% else %}Currently Off-Duty{% endif %}</span>
                             </span>
-                            <button type="button" class="btn btn-sm btn-outline-danger rounded-pill fw-bold" id="toggleAvailabilityBtn" onclick="toggleAvailability()">
+                            <button type="button" class="btn btn-sm btn-outline-danger rounded-pill fw-bold text-nowrap" id="toggleAvailabilityBtn" onclick="toggleAvailability()">
                                 Toggle Status
                             </button>
                         </div>
@@ -42,19 +42,19 @@
         </div>
 
         <!-- DIGITAL DONOR SMART IDENTITY PASS (FEATURE 1) -->
-        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-4 mb-4 bg-white">
-            <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2">
-                <div>
-                    <h5 class="fw-bold mb-0">
+        <div class="card border-0 shadow-sm rounded-4 p-3 p-md-4 mb-4 bg-white">
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 mb-3">
+                <div class="min-w-0" style="min-width: 0;">
+                    <h5 class="fw-bold mb-0 text-break">
                         <i class="bi bi-person-vcard text-danger me-2"></i>Official Digital Blood Donor Smart Pass
                     </h5>
-                    <small class="text-muted">Government &amp; East Singhbhum Hospital Network Authenticated Virtual Identity</small>
+                    <small class="text-muted text-break d-block">Government &amp; East Singhbhum Hospital Network Authenticated Virtual Identity</small>
                 </div>
-                <div class="d-flex flex-wrap gap-2 w-100 w-sm-auto mt-2 mt-md-0">
-                    <button type="button" class="btn btn-outline-dark btn-sm rounded-pill fw-bold flex-fill flex-sm-grow-0" onclick="printDonorSmartCard()">
+                <div class="d-flex flex-wrap gap-2 w-100 w-sm-auto mt-2 mt-sm-0">
+                    <button type="button" class="btn btn-outline-dark btn-sm rounded-pill fw-bold flex-fill flex-sm-grow-0 text-nowrap" onclick="printDonorSmartCard()">
                         <i class="bi bi-printer me-1"></i> Print ID Card
                     </button>
-                    <a href="{% url 'verify_donor_card' donor.id %}" target="_blank" class="btn btn-primary-red btn-sm rounded-pill fw-bold flex-fill flex-sm-grow-0">
+                    <a href="{% url 'verify_donor_card' donor.id %}" target="_blank" class="btn btn-primary-red btn-sm rounded-pill fw-bold flex-fill flex-sm-grow-0 text-nowrap">
                         <i class="bi bi-file-earmark-pdf-fill me-1"></i> Official Certificate (PDF)
                     </a>
                 </div>
@@ -112,7 +112,7 @@
                         </div>
 
                         <!-- Bottom Row: Blood Group, Issue Date, Validity -->
-                        <div class="d-flex align-items-end justify-content-between pt-2 border-top border-white border-opacity-25">
+                        <div class="d-flex flex-wrap align-items-end justify-content-between gap-2 pt-2 border-top border-white border-opacity-25">
                             <div>
                                 <small class="text-white-50 d-block" style="font-size: 0.65rem; text-transform: uppercase;">Blood Type</small>
                                 <span class="badge bg-danger fs-5 px-3 py-0 rounded-pill fw-bold">{{ donor.blood_group }}</span>
@@ -123,7 +123,7 @@
                             </div>
                             <div class="text-end">
                                 <small class="text-white-50 d-block" style="font-size: 0.65rem; text-transform: uppercase;">Status</small>
-                                <span class="badge bg-success rounded-pill px-2 py-1" style="font-size: 0.7rem;"><i class="bi bi-check-circle-fill me-1"></i>ACTIVE DONOR</span>
+                                <span class="badge bg-success rounded-pill px-2 py-1 text-nowrap" style="font-size: 0.7rem;"><i class="bi bi-check-circle-fill me-1"></i>ACTIVE DONOR</span>
                             </div>
                         </div>
                     </div>
@@ -162,28 +162,28 @@
         <!-- KPI SUMMARY CARDS -->
         <div class="row g-3 mb-4">
             <div class="col-md-4">
-                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
-                    <span class="text-muted small fw-bold text-uppercase d-block mb-1">Total Lifetime Donations</span>
+                <div class="card border-0 shadow-sm rounded-4 p-3 p-md-4 bg-white h-100">
+                    <span class="text-muted small fw-bold text-uppercase d-block mb-1 text-break">Total Lifetime Donations</span>
                     <h2 class="fw-bold text-danger mb-1">{{ donor.total_donations }}</h2>
-                    <small class="text-muted"><i class="bi bi-heart-fill text-danger me-1"></i>Estimated ~{{ donor.total_donations|add:donor.total_donations|add:donor.total_donations }} lives impacted</small>
+                    <small class="text-muted text-break"><i class="bi bi-heart-fill text-danger me-1"></i>Estimated ~{{ donor.total_donations|add:donor.total_donations|add:donor.total_donations }} lives impacted</small>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
-                    <span class="text-muted small fw-bold text-uppercase d-block mb-1">Last Donation Date</span>
-                    <h3 class="fw-bold text-dark mb-1">{{ donor.last_donation_date|date:"d M Y"|default:"Ready for First Donation" }}</h3>
-                    <small class="text-muted">Recorded in LifeStream registry</small>
+                <div class="card border-0 shadow-sm rounded-4 p-3 p-md-4 bg-white h-100">
+                    <span class="text-muted small fw-bold text-uppercase d-block mb-1 text-break">Last Donation Date</span>
+                    <h3 class="fw-bold text-dark mb-1 text-break">{{ donor.last_donation_date|date:"d M Y"|default:"Ready for First Donation" }}</h3>
+                    <small class="text-muted text-break">Recorded in LifeStream registry</small>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
-                    <span class="text-muted small fw-bold text-uppercase d-block mb-1">Next Donation Eligibility</span>
+                <div class="card border-0 shadow-sm rounded-4 p-3 p-md-4 bg-white h-100">
+                    <span class="text-muted small fw-bold text-uppercase d-block mb-1 text-break">Next Donation Eligibility</span>
                     {% if is_eligible %}
-                        <h3 class="fw-bold text-success mb-1"><i class="bi bi-check-circle-fill me-1"></i>Eligible Today</h3>
-                        <small class="text-success fw-bold">You are eligible to donate whole blood</small>
+                        <h3 class="fw-bold text-success mb-1 text-break"><i class="bi bi-check-circle-fill me-1"></i>Eligible Today</h3>
+                        <small class="text-success fw-bold text-break">You are eligible to donate whole blood</small>
                     {% else %}
-                        <h3 class="fw-bold text-warning mb-1">Eligible in {{ days_until_eligible }} days</h3>
-                        <small class="text-muted">Safe recovery period (90 days interval)</small>
+                        <h3 class="fw-bold text-warning mb-1 text-break">Eligible in {{ days_until_eligible }} days</h3>
+                        <small class="text-muted text-break">Safe recovery period (90 days interval)</small>
                     {% endif %}
                 </div>
             </div>
@@ -191,25 +191,25 @@
 
         <!-- SIMULATED MOBILE SMS DISPATCH ALERT FOR DONOR -->
         <div class="alert alert-danger border-danger border-opacity-25 rounded-4 p-3 mb-4 shadow-sm bg-danger bg-opacity-10">
-            <div class="d-flex align-items-start gap-3">
-                <div class="rounded-circle bg-danger text-white d-flex align-items-center justify-content-center p-2 flex-shrink-0" style="width: 44px; height: 44px; font-size: 1.25rem;">
+            <div class="d-flex align-items-start gap-2 gap-sm-3">
+                <div class="rounded-circle bg-danger text-white d-flex align-items-center justify-content-center p-2 flex-shrink-0" style="width: 42px; height: 42px; font-size: 1.15rem;">
                     <i class="bi bi-chat-left-dots-fill"></i>
                 </div>
-                <div class="flex-grow-1">
-                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-1">
-                        <span class="badge bg-danger rounded-pill px-3 py-1 text-uppercase font-monospace" style="font-size: 0.72rem;">
+                <div class="flex-grow-1 min-w-0" style="min-width: 0;">
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-1 mb-2">
+                        <span class="badge bg-danger rounded-pill px-3 py-1 text-uppercase font-monospace text-wrap" style="font-size: 0.72rem;">
                             <i class="bi bi-broadcast me-1"></i> Cellular SMS Alert Received
                         </span>
-                        <small class="text-muted font-monospace"><i class="bi bi-phone me-1"></i>Delivered to {{ donor.phone|default:"+91 98765 43210" }} via Gateway JH-ES-4310</small>
+                        <small class="text-muted font-monospace text-break"><i class="bi bi-phone me-1"></i>Delivered to {{ donor.phone|default:"+91 98765 43210" }} via Gateway JH-ES-4310</small>
                     </div>
-                    <p class="mb-1 text-dark fw-semibold mt-2" style="font-size: 0.92rem;">
+                    <p class="mb-2 text-dark fw-semibold text-break" style="font-size: 0.92rem; line-height: 1.5;">
                         &ldquo;🚨 <strong>CRITICAL TRANSFUSION ALERT:</strong> Tata Main Hospital (TMH) urgently requires 2 units of {{ donor.blood_group }} blood for trauma surgery patient Akash. You are registered as an active donor in East Singhbhum. If available, please report or respond.&rdquo;
                     </p>
-                    <div class="d-flex flex-wrap align-items-center gap-2 mt-2 pt-2 border-top border-danger border-opacity-25">
-                        <a href="tel:+916572224567" class="btn btn-danger btn-sm py-1 px-3 rounded-pill fw-bold" style="font-size: 0.8rem; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                    <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2 mt-2 pt-2 border-top border-danger border-opacity-25">
+                        <a href="tel:+916572224567" class="btn btn-danger btn-sm py-2 px-3 rounded-pill fw-bold text-center text-nowrap" style="font-size: 0.8rem; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
                             <i class="bi bi-telephone-fill me-1"></i> Respond: Call TMH Blood Center
                         </a>
-                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill py-1 px-2" style="font-size: 0.75rem;">
+                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill py-2 px-3 text-wrap text-center" style="font-size: 0.75rem; white-space: normal !important; word-break: break-word;">
                             <i class="bi bi-check-all me-1"></i> SMS Gateway Acknowledged: Delivered 100%
                         </span>
                     </div>
@@ -218,15 +218,15 @@
         </div>
 
         <!-- MATCHING EMERGENCY BLOOD REQUESTS -->
-        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <div>
-                    <h5 class="fw-bold mb-1">
+        <div class="card border-0 shadow-sm rounded-4 p-3 p-md-4 bg-white mb-4">
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 mb-3">
+                <div class="min-w-0" style="min-width: 0;">
+                    <h5 class="fw-bold mb-1 text-break">
                         <i class="bi bi-broadcast text-danger me-2"></i>Urgent Requests Matching Your Blood Group ({{ donor.blood_group }})
                     </h5>
-                    <small class="text-muted">Patients admitted in East Singhbhum hospitals in critical need of {{ donor.blood_group }} blood.</small>
+                    <small class="text-muted text-break d-block">Patients admitted in East Singhbhum hospitals in critical need of {{ donor.blood_group }} blood.</small>
                 </div>
-                <a href="{% url 'request_blood' %}" class="btn btn-outline-danger btn-sm rounded-pill">View All Network</a>
+                <a href="{% url 'request_blood' %}" class="btn btn-outline-danger btn-sm rounded-pill text-nowrap flex-shrink-0 mt-1 mt-sm-0">View All Network</a>
             </div>
 
             <div class="table-responsive">
@@ -365,10 +365,10 @@
         <div class="row g-4">
             <!-- MY REGISTERED CAMPS -->
             <div class="col-lg-6">
-                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="fw-bold mb-0"><i class="bi bi-calendar-check text-danger me-2"></i>My Registered Camps</h5>
-                        <a href="{% url 'camps' %}" class="btn btn-sm btn-outline-danger rounded-pill">Browse Camps</a>
+                <div class="card border-0 shadow-sm rounded-4 p-3 p-md-4 bg-white h-100">
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 mb-3">
+                        <h5 class="fw-bold mb-0 text-break"><i class="bi bi-calendar-check text-danger me-2"></i>My Registered Camps</h5>
+                        <a href="{% url 'camps' %}" class="btn btn-sm btn-outline-danger rounded-pill text-nowrap flex-shrink-0 mt-1 mt-sm-0">Browse Camps</a>
                     </div>
                     {% for reg in my_camps %}
                     <div class="p-3 bg-light rounded-3 mb-2 border">
@@ -392,10 +392,10 @@
 
             <!-- MY DONATION HISTORY -->
             <div class="col-lg-6">
-                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="fw-bold mb-0"><i class="bi bi-award-fill text-danger me-2"></i>My Donation Records</h5>
-                        <button type="button" class="btn btn-sm btn-outline-danger rounded-pill fw-bold" data-bs-toggle="modal" data-bs-target="#recordOfflineDonationModal">
+                <div class="card border-0 shadow-sm rounded-4 p-3 p-md-4 bg-white h-100">
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 mb-3">
+                        <h5 class="fw-bold mb-0 text-break"><i class="bi bi-award-fill text-danger me-2"></i>My Donation Records</h5>
+                        <button type="button" class="btn btn-sm btn-outline-danger rounded-pill fw-bold text-nowrap flex-shrink-0 mt-1 mt-sm-0" data-bs-toggle="modal" data-bs-target="#recordOfflineDonationModal">
                             <i class="bi bi-plus-circle me-1"></i> Log Donation
                         </button>
                     </div>
