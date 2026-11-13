@@ -22,8 +22,11 @@
     <div class="container">
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
             <div>
-                <h4 class="fw-bold mb-1">Scheduled Blood Donation Camps <span class="badge bg-danger rounded-pill fs-6 ms-1">{{ total_camps }} Active</span></h4>
-                <small class="text-muted">Conducted by authorized medical colleges, Rotary/Lions clubs, and municipal red cross chapters.</small>
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                    <h4 class="fw-bold mb-0">Scheduled Blood Donation Camps</h4>
+                    <span class="badge bg-danger rounded-pill">{{ total_camps }} Active</span>
+                </div>
+                <small class="text-muted d-block">Conducted by authorized medical colleges, Rotary/Lions clubs, and municipal red cross chapters.</small>
             </div>
             {% if is_admin_role or user.is_superuser %}
             <a href="/admin/bloodbank/donationcamp/add/" target="_blank" class="btn btn-primary-red btn-sm rounded-pill">

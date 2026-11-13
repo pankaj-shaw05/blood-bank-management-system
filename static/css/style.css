@@ -2502,8 +2502,87 @@ pre, code, #broadcastConsoleLog, #adminBroadcastConsoleLog {
     max-width: 100% !important;
     display: block !important;
     margin-bottom: 0.5rem;
+    scrollbar-width: thin;
 }
 
+/* Universal Media Query System: Covers EVERY Screen & Device in the World */
+
+/* -------------------------------------------------------------
+   DEVICE TIER 1: Wearables & Ultra-Compact / Foldables (< 360px)
+   (e.g., Samsung Galaxy Z Fold closed 320px, iPhone SE 1st gen, smart displays)
+   ------------------------------------------------------------- */
+@media (max-width: 359.98px) {
+    body {
+        font-size: 0.88rem !important;
+    }
+
+    h1, .hero-title-centered { font-size: 1.35rem !important; }
+    h2 { font-size: 1.2rem !important; }
+    h3 { font-size: 1.08rem !important; }
+    h4 { font-size: 0.98rem !important; }
+    h5 { font-size: 0.9rem !important; }
+
+    .card, .custom-card, .p-3, .p-4, .p-md-5 {
+        padding: 0.75rem 0.65rem !important;
+        border-radius: 0.75rem !important;
+    }
+
+    .container, .container-fluid {
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+    }
+
+    /* Navbar */
+    .navbar-brand-logo .logo-text-title {
+        font-size: 1.05rem !important;
+    }
+    .logo-icon-box {
+        width: 30px !important;
+        height: 30px !important;
+        font-size: 1rem !important;
+    }
+    .logo-tagline {
+        display: none !important;
+    }
+
+    /* Buttons */
+    .btn {
+        padding: 0.35rem 0.65rem !important;
+        font-size: 0.78rem !important;
+        min-height: 34px !important;
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.5rem !important;
+        font-size: 0.72rem !important;
+        min-height: 28px !important;
+    }
+
+    /* Blood Selector Buttons */
+    .blood-selector-btn {
+        width: 34px !important;
+        height: 34px !important;
+        font-size: 0.72rem !important;
+    }
+
+    /* Donor Smart Pass Card */
+    .donor-smart-card {
+        padding: 0.75rem !important;
+    }
+    .donor-smart-card img.donor-qr-code-img {
+        width: 54px !important;
+        height: 54px !important;
+    }
+
+    .hero-glass-search-card {
+        padding: 0.85rem !important;
+    }
+}
+
+/* -------------------------------------------------------------
+   DEVICE TIER 2: Compact & Standard Smartphones (360px - 575.98px)
+   (e.g., iPhone 12/13/14/15/16, Galaxy S21/S22/S23/S24, Pixel 7/8/9, Redmi, Oppo)
+   ------------------------------------------------------------- */
 @media (max-width: 575.98px) {
     /* Headings */
     h1 { font-size: 1.6rem !important; }
@@ -2565,6 +2644,174 @@ pre, code, #broadcastConsoleLog, #adminBroadcastConsoleLog {
     .donor-smart-card {
         padding: 1rem 0.85rem !important;
         min-height: auto !important;
+    }
+}
+
+/* -------------------------------------------------------------
+   DEVICE TIER 3: Phablets & Landscape Phones (576px - 767.98px)
+   (e.g., iPhone Pro Max landscape, Foldables open, small Android phablets)
+   ------------------------------------------------------------- */
+@media (min-width: 576px) and (max-width: 767.98px) {
+    .container {
+        padding-left: 14px !important;
+        padding-right: 14px !important;
+    }
+    .card, .custom-card {
+        padding: 1.35rem 1.15rem !important;
+    }
+    .blood-selector-btn {
+        width: 44px !important;
+        height: 44px !important;
+        font-size: 0.88rem !important;
+    }
+}
+
+/* -------------------------------------------------------------
+   DEVICE TIER 4: Tablets & iPads (768px - 1024px)
+   (e.g., iPad Mini, iPad 9th/10th Gen, iPad Air, Surface Go)
+   ------------------------------------------------------------- */
+@media (min-width: 768px) and (max-width: 1024px) {
+    .hero-content-centered {
+        max-width: 90% !important;
+        margin: 0 auto;
+    }
+    .donor-smart-card {
+        min-height: 240px;
+    }
+    .card.p-md-5 {
+        padding: 2rem !important;
+    }
+}
+
+/* -------------------------------------------------------------
+   DEVICE TIER 5: Short Screens & Landscape Orientation (Height < 680px)
+   (Prevents sticky forms from clipping off-screen when device is turned sideways)
+   ------------------------------------------------------------- */
+@media (max-height: 680px) {
+    .sticky-top {
+        position: static !important;
+    }
+    .hero-section {
+        min-height: auto !important;
+        padding-top: 5rem !important;
+        padding-bottom: 3rem !important;
+    }
+}
+
+/* -------------------------------------------------------------
+   DEVICE TIER 6: Touchscreen & Mobile Pointer Optimization
+   (Eliminates sticky hover bugs on touch screens)
+   ------------------------------------------------------------- */
+@media (hover: none) and (pointer: coarse) {
+    /* Touch Target Optimization */
+    button, a.btn, input, select {
+        touch-action: manipulation;
+    }
+
+    /* Remove annoying lingering hover translations on touch devices */
+    .custom-card:hover, 
+    .card:hover, 
+    .compat-card:hover,
+    .blood-selector-btn:hover {
+        transform: none !important;
+    }
+
+    /* Native touch scroll feedback */
+    * {
+        -webkit-tap-highlight-color: rgba(220, 38, 38, 0.12);
+    }
+}
+
+/* -------------------------------------------------------------
+   DEVICE TIER 7: Laptops & Standard Desktops (1025px - 1440px)
+   (e.g., MacBook Air/Pro 13/14, Dell XPS 13, 1080p Laptops)
+   ------------------------------------------------------------- */
+@media (min-width: 1025px) and (max-width: 1440px) {
+    .container {
+        max-width: 1200px !important;
+    }
+}
+
+/* -------------------------------------------------------------
+   DEVICE TIER 8: Large Desktops & QHD / 2K Monitors (1441px - 1920px)
+   (e.g., 24" & 27" Full HD / 1440p displays, iMac 24")
+   ------------------------------------------------------------- */
+@media (min-width: 1441px) and (max-width: 1920px) {
+    .container {
+        max-width: 1380px !important;
+    }
+}
+
+/* -------------------------------------------------------------
+   DEVICE TIER 9: Ultra-Wide & 4K Displays (1921px - 3840px+)
+   (e.g., 34" Ultrawide, 32" 4K Monitors, Smart TVs, Large Presentation Screens)
+   ------------------------------------------------------------- */
+@media (min-width: 1921px) {
+    /* Content Centering & Containment: Never allow content to stretch absurdly wide */
+    .container, 
+    .main-navbar > .container-fluid,
+    .footer-section > .container {
+        max-width: 1600px !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+
+    body {
+        font-size: 1.08rem !important;
+    }
+
+    h1, .hero-title-centered {
+        font-size: 3.5rem !important;
+    }
+
+    h2 {
+        font-size: 2.5rem !important;
+    }
+
+    h3 {
+        font-size: 2rem !important;
+    }
+
+    .hero-content-centered {
+        max-width: 1100px !important;
+        margin: 0 auto;
+    }
+
+    .hero-glass-search-card {
+        padding: 2.25rem 2.5rem !important;
+    }
+
+    .card, .custom-card {
+        border-radius: 1.5rem !important;
+    }
+
+    .donor-smart-card {
+        border-radius: 1.5rem !important;
+        min-height: 280px !important;
+    }
+}
+
+/* -------------------------------------------------------------
+   DEVICE TIER 10: Print Media (A4 / Letter Clean Format)
+   ------------------------------------------------------------- */
+@media print {
+    body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-size: 11pt !important;
+    }
+    .main-navbar, .footer-section, .floating-call-btn, .back-to-top, .lifebot-chat-window, .lifebot-toggle-btn {
+        display: none !important;
+    }
+    .container {
+        max-width: 100% !important;
+        width: 100% !important;
+        padding: 0 !important;
+    }
+    .card {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+        page-break-inside: avoid;
     }
 }
 

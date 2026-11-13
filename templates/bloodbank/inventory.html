@@ -56,13 +56,13 @@
 <!-- LIVE 8 BLOOD GROUPS CARDS GRID -->
 <section class="py-5 bg-white">
     <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 mb-4">
             <div>
                 <h4 class="fw-bold mb-1">Reserve Status by Blood Group</h4>
                 <small class="text-muted">Updated in real-time by regional hospital transfusions &amp; community donation drives.</small>
             </div>
             {% if is_admin_role or user.is_superuser %}
-            <a href="/admin/bloodbank/bloodinventory/" target="_blank" class="btn btn-outline-dark btn-sm rounded-pill">
+            <a href="/admin/bloodbank/bloodinventory/" target="_blank" class="btn btn-outline-dark btn-sm rounded-pill text-nowrap flex-shrink-0 mt-1 mt-sm-0">
                 <i class="bi bi-pencil-square me-1"></i> Update Stock in Admin
             </a>
             {% endif %}
