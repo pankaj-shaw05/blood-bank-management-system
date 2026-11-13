@@ -1,0 +1,966 @@
+{% extends 'bloodbank/base.html' %}
+{% load static %}
+
+{% block title %}Emergency Blood Requisition & Map | LifeStream{% endblock %}
+
+{% block content %}
+<!-- INNER HEADER BANNER -->
+<section class="inner-page-header">
+    <div class="container position-relative" style="z-index: 2;">
+        <div class="breadcrumb-custom">
+            <a href="{% url 'home' %}"><i class="bi bi-house"></i> Home</a>
+            <i class="bi bi-chevron-right text-white-50"></i>
+            <span>Emergency Blood Requisition</span>
+        </div>
+        <h1>East Singhbhum Hospital Network &amp; Requisitions</h1>
+        <p>Broadcast your patient's urgent blood requisition across accredited healthcare facilities and blood banks located strictly inside East Singhbhum district, Jharkhand.</p>
+    </div>
+</section>
+
+<!-- EAST SINGHBHUM DISTRICT GEOFENCE & INTERACTIVE HOSPITAL MAP SECTION -->
+<section class="py-5 bg-white border-bottom" id="geofenceMapSection">
+    <div class="container">
+        <div class="section-header text-center mb-4">
+            <div class="d-inline-flex flex-wrap justify-content-center align-items-center gap-2 mb-2">
+                <span class="badge bg-danger rounded-pill px-3 py-2 fw-bold text-uppercase">
+                    <i class="bi bi-shield-check me-1"></i> Geographic Boundary Geofence Active
+                </span>
+                <span class="badge bg-dark rounded-pill px-3 py-2 fw-bold">
+                    <i class="bi bi-geo-alt-fill text-danger me-1"></i> East Singhbhum District, Jharkhand, India
+                </span>
+            </div>
+            <h2 class="section-title">Verified Hospital Network &amp; Interactive Map</h2>
+            <p class="section-subtitle">
+                Exclusively displaying 8 verified hospitals located strictly inside the <strong>official East Singhbhum boundary polygon</strong> (Jamshedpur, Mango, Sakchi, Bistupur, Golmuri, Telco, Baridih, Jugsalai &amp; Khasmahal). Neighboring districts are mathematically excluded.
+            </p>
+        </div>
+
+        <!-- Locality Filter Bar -->
+        <div class="card border-0 bg-light rounded-4 p-3 p-md-4 mb-4 shadow-sm">
+            <div class="row g-3 align-items-center">
+                <div class="col-lg-8">
+                    <div class="d-flex flex-wrap align-items-center gap-2" id="localityFilterButtons">
+                        <span class="small fw-bold text-muted me-1"><i class="bi bi-funnel-fill text-danger me-1"></i>Locality:</span>
+                        <button class="btn btn-sm btn-danger rounded-pill locality-filter-btn active" data-locality="ALL">All East Singhbhum (8)</button>
+                        <button class="btn btn-sm btn-outline-danger rounded-pill locality-filter-btn" data-locality="Bistupur">Bistupur (1)</button>
+                        <button class="btn btn-sm btn-outline-danger rounded-pill locality-filter-btn" data-locality="Sakchi">Sakchi (1)</button>
+                        <button class="btn btn-sm btn-outline-danger rounded-pill locality-filter-btn" data-locality="Telco">Telco &amp; Golmuri (2)</button>
+                        <button class="btn btn-sm btn-outline-danger rounded-pill locality-filter-btn" data-locality="Mango">Mango &amp; NH-33 (1)</button>
+                        <button class="btn btn-sm btn-outline-danger rounded-pill locality-filter-btn" data-locality="Baridih">Baridih (1)</button>
+                        <button class="btn btn-sm btn-outline-danger rounded-pill locality-filter-btn" data-locality="Jugsalai">Jugsalai &amp; Khasmahal (2)</button>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-lg-end">
+                    <button class="btn btn-outline-dark btn-sm rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#geofenceAuditModal">
+                        <i class="bi bi-shield-lock-fill text-success me-1"></i> View Geofence Audit Log
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leaflet Map Container Card -->
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+            <div class="card-header bg-dark text-white p-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-map-fill text-danger fs-5"></i>
+                    <span class="fw-bold">East Singhbhum District Geofenced Map</span>
+                    <span class="badge bg-danger text-white rounded-pill small">Boundary Polygon Enforced</span>
+                </div>
+                <div class="d-flex align-items-center gap-3 small text-white-50">
+                    <span><span class="legend-color-box border-dashed-red"></span> Red Dashed: District Boundary</span>
+                    <span><span class="legend-color-box bg-danger"></span> Red Pin: Verified Hospital</span>
+                </div>
+            </div>
+            <div class="card-body p-0 position-relative">
+                <div id="hospitalMap" style="height: 480px; width: 100%;"></div>
+                <div class="map-floating-status" id="mapHoverStatus">
+                    <i class="bi bi-pin-map-fill text-danger me-1"></i> Click any hospital marker to inspect verified coordinates &amp; select for blood requisition.
+                </div>
+            </div>
+        </div>
+
+        <!-- Searchable Hospital Directory Header & Search Bar -->
+        <div class="card border-0 bg-white shadow-sm rounded-4 p-3 p-md-4 mb-4">
+            <div class="row g-3 align-items-center">
+                <div class="col-lg-6">
+                    <div class="d-flex align-items-center gap-2">
+                        <h5 class="fw-bold mb-0">Verified East Singhbhum Facilities</h5>
+                        <span class="badge bg-danger rounded-pill px-3 py-1" id="hospitalCountBadge">{{ hospitals_count }} Verified</span>
+                    </div>
+                    <small class="text-muted d-block mt-1">
+                        Official East Singhbhum district health network &mdash; government district hospital, sub-divisional hospital, CHCs, and accredited facilities.
+                    </small>
+                </div>
+                <div class="col-lg-6">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border text-danger"><i class="bi bi-search"></i></span>
+                        <input type="text" id="hospitalSearchInput" class="form-control bg-light border ps-2" placeholder="Search facilities by name, locality (e.g. Bistupur, Sakchi, Ghatshila), or type..." autocomplete="off">
+                        <button class="btn btn-outline-secondary" type="button" id="clearHospitalSearchBtn" title="Clear search">
+                            <i class="bi bi-x-circle"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hospitals Cards Grid -->
+        <div class="row g-3" id="hospitalDirectoryCards">
+            {% for h in hospitals %}
+            <div class="col-md-6 col-lg-4 hospital-card-item" data-id="{{ h.hospital_id }}" data-locality="{{ h.locality }}" data-name="{{ h.name|lower }}">
+                <div class="custom-card p-3 h-100 d-flex flex-column justify-content-between hospital-item-card border-top border-3 border-danger shadow-sm" id="card-{{ h.hospital_id }}">
+                    <div>
+                        <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
+                            <span class="badge bg-danger-subtle text-danger fw-bold rounded-pill px-2 py-1">
+                                <i class="bi bi-geo-alt-fill me-1"></i>{{ h.locality }}
+                            </span>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle small">
+                                <i class="bi bi-shield-check me-1"></i>Verified Geofence
+                            </span>
+                        </div>
+
+                        <h6 class="fw-bold text-dark mb-1">{{ h.name }}</h6>
+                        <p class="small text-muted mb-2"><i class="bi bi-geo me-1"></i>{{ h.address }}</p>
+
+                        <div class="bg-light p-2 rounded small mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-muted">GPS Coordinates:</span>
+                                <span class="font-monospace text-danger fw-bold">{{ h.latitude|floatformat:4 }}°N, {{ h.longitude|floatformat:4 }}°E</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-muted">Facility Type:</span>
+                                <span class="text-dark fw-bold">{{ h.category }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-muted">Blood Bank:</span>
+                                <span class="text-success fw-bold">{{ h.blood_bank_status }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted">Confirmed Stock:</span>
+                                <span class="badge bg-danger text-white">{{ h.available_units }} Units in Database</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="d-flex align-items-center justify-content-between small text-muted mb-3 pb-2 border-bottom">
+                            <span><i class="bi bi-telephone-fill text-success me-1"></i>{{ h.phone }}</span>
+                            <span><i class="bi bi-inpatient text-primary me-1"></i>{{ h.beds }} Beds</span>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-danger btn-sm flex-fill" onclick="locateHospitalOnMap('{{ h.hospital_id }}', {{ h.latitude }}, {{ h.longitude }})">
+                                <i class="bi bi-geo-fill"></i> View on Map
+                            </button>
+                            <button class="btn btn-primary-red btn-sm flex-fill" onclick="selectHospitalForRequest('{{ h.id }}', '{{ h.name|escapejs }}', '{{ h.locality|escapejs }}', '{{ h.phone|escapejs }}')">
+                                <i class="bi bi-pencil-square"></i> Select Facility
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- MAIN REQUEST CONTENT SECTION: WORKING DJANGO FORM -->
+<section class="py-5 bg-light" id="requisitionFormSection">
+    <div class="container">
+        <!-- USER / HOSPITAL SESSION NOTIFICATION BANNER -->
+        {% if logged_in_hospital %}
+        <div class="alert alert-primary border-primary border-2 d-flex flex-wrap align-items-center justify-content-between p-3 rounded-4 mb-4 shadow-sm bg-white">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-circle bg-primary bg-opacity-10 text-primary p-2 d-flex align-items-center justify-content-center" style="width: 52px; height: 52px;">
+                    <i class="bi bi-hospital fs-3"></i>
+                </div>
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <strong class="text-primary fs-5">{{ logged_in_hospital.name }}</strong>
+                        <span class="badge bg-success rounded-pill small"><i class="bi bi-shield-check me-1"></i>Verified Hospital Account</span>
+                    </div>
+                    <div class="small text-muted">
+                        <span class="me-3"><i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ logged_in_hospital.locality }}, East Singhbhum</span>
+                        <span class="me-3"><i class="bi bi-inpatient text-primary me-1"></i>{{ logged_in_hospital.beds }} Bed Capacity</span>
+                        <span class="me-3"><i class="bi bi-droplet-half text-danger me-1"></i>{{ logged_in_hospital.blood_bank_status }}</span>
+                        <span>Stock: <strong class="text-danger">{{ logged_in_hospital.available_units }} Units</strong></span>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2 mt-2 mt-md-0">
+                <a href="{% url 'dashboard_hospital' %}" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm">
+                    <i class="bi bi-speedometer2 me-1"></i> Hospital Dashboard
+                </a>
+            </div>
+        </div>
+        {% elif logged_in_donor %}
+        <div class="alert alert-danger bg-danger-subtle border-danger border-2 d-flex flex-wrap align-items-center justify-content-between p-3 rounded-4 mb-4 shadow-sm bg-white">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-circle bg-danger bg-opacity-10 text-danger p-2 d-flex align-items-center justify-content-center" style="width: 52px; height: 52px;">
+                    <i class="bi bi-person-heart fs-3"></i>
+                </div>
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <strong class="text-danger fs-5">{{ logged_in_donor.full_name }}</strong>
+                        <span class="badge bg-danger rounded-pill">{{ logged_in_donor.blood_group }} Donor Profile</span>
+                    </div>
+                    <div class="small text-muted">
+                        <span class="me-3"><i class="bi bi-telephone-fill text-success me-1"></i>{{ logged_in_donor.phone }}</span>
+                        <span class="me-3"><i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ logged_in_donor.city }}</span>
+                        <span>Status: <strong class="text-success">Active Registered Donor</strong></span>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2 mt-2 mt-md-0">
+                <a href="{% url 'dashboard_donor' %}" class="btn btn-outline-danger btn-sm rounded-pill px-3 shadow-sm">
+                    <i class="bi bi-speedometer2 me-1"></i> Donor Dashboard
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="row g-5">
+            <!-- LEFT COLUMN: DONOR LIFE-SAVER RESPONSE HUB OR HOSPITAL/GUEST FORM -->
+            <div class="col-lg-5">
+                {% if logged_in_donor %}
+                <!-- DONOR LIFE SAVER RESPONSE CENTER (NO SELF-REQUEST FORM) -->
+                <div class="bg-white p-4 p-md-5 rounded-4 border border-danger border-opacity-25 shadow-sm sticky-top" style="top: 100px;">
+                    <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+                        <div class="rounded-circle bg-danger text-white p-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 54px; height: 54px;">
+                            <i class="bi bi-heart-pulse-fill fs-3"></i>
+                        </div>
+                        <div>
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill mb-1">
+                                <i class="bi bi-award-fill me-1"></i>Voluntary Blood Donor
+                            </span>
+                            <h4 class="fw-bold mb-0 text-dark">Donor Response Center</h4>
+                            <small class="text-muted">You donate blood to save critical patients</small>
+                        </div>
+                    </div>
+
+                    <!-- Donor Identity & Readiness Box -->
+                    <div class="bg-light p-3 rounded-4 mb-3 border">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h5 class="fw-bold mb-0 text-dark">{{ logged_in_donor.full_name }}</h5>
+                                <small class="text-muted font-monospace"><i class="bi bi-qr-code me-1"></i>DONOR-ES-{{ logged_in_donor.id|stringformat:"04d" }}</small>
+                            </div>
+                            <span class="badge bg-danger fs-5 px-3 py-2 rounded-pill shadow-sm">{{ logged_in_donor.blood_group }}</span>
+                        </div>
+                        <div class="small text-muted mt-2 pt-2 border-top d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ logged_in_donor.city }}, East Singhbhum</span>
+                            {% if logged_in_donor.is_available %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-check-circle-fill me-1"></i>Ready to Donate</span>
+                            {% else %}
+                                <span class="badge bg-warning-subtle text-dark border border-warning-subtle"><i class="bi bi-pause-circle-fill me-1"></i>Resting / On Cooldown</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Donor Life Saver Notice -->
+                    <div class="alert alert-danger bg-danger-subtle border-danger border-2 rounded-3 small mb-4">
+                        <div class="d-flex gap-2">
+                            <i class="bi bi-info-circle-fill fs-5 text-danger flex-shrink-0"></i>
+                            <div>
+                                <strong>How Voluntary Donors Help:</strong>
+                                <p class="mb-1 mt-1">Donors give blood to patients in need. Review the active hospital requisitions on the right. When you find a matching request for <strong>{{ logged_in_donor.blood_group }}</strong>, click <strong>"I Can Donate"</strong> or call the hospital coordinator directly.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Direct Navigation & Response Actions -->
+                    <div class="d-grid gap-2 mb-3">
+                        <a href="{% url 'dashboard_donor' %}" class="btn btn-danger py-2 fw-bold shadow-sm rounded-pill">
+                            <i class="bi bi-speedometer2 me-2"></i>My Donor Dashboard &amp; Smart Card
+                        </a>
+                        <a href="{% url 'camps' %}" class="btn btn-outline-danger py-2 fw-semibold rounded-pill">
+                            <i class="bi bi-calendar-check me-2"></i>Upcoming Blood Donation Camps
+                        </a>
+                        <a href="{% url 'donors' %}" class="btn btn-outline-secondary py-2 fw-semibold rounded-pill">
+                            <i class="bi bi-people me-2"></i>Find Other Donors
+                        </a>
+                    </div>
+
+                    <!-- Collapsible Family Requisition Form for Genuine Emergencies -->
+                    <div class="mt-4 pt-3 border-top">
+                        <button class="btn btn-sm btn-link text-muted text-decoration-none p-0 d-flex align-items-center justify-content-between w-100" type="button" data-bs-toggle="collapse" data-bs-target="#familyEmergencyFormCollapse" aria-expanded="false" aria-controls="familyEmergencyFormCollapse">
+                            <span class="small fw-semibold text-secondary"><i class="bi bi-question-circle me-1"></i>Need blood for a hospitalized family member?</span>
+                            <i class="bi bi-chevron-down small"></i>
+                        </button>
+                        <div class="collapse mt-3" id="familyEmergencyFormCollapse">
+                            <div class="p-3 bg-light rounded-3 border">
+                                <p class="small text-muted mb-3">If a family member or relative is admitted in hospital and urgently needs blood, submit this requisition form on their behalf:</p>
+                                <form method="POST" action="{% url 'request_blood' %}" id="familyBloodRequestForm">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="district" value="East Singhbhum">
+                                    <div class="mb-2">
+                                        <label class="form-label small fw-bold">Select Hospital <span class="text-danger">*</span></label>
+                                        <select name="hospital" class="form-select form-select-sm" required>
+                                            <option value="">-- Choose Hospital --</option>
+                                            {% for h in hospitals %}
+                                            <option value="{{ h.id }}">{{ h.name }} ({{ h.locality }})</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label small fw-bold">Patient Legal Name <span class="text-danger">*</span></label>
+                                        <input type="text" name="patient_name" class="form-control form-control-sm" placeholder="Admitted Patient Full Name" required>
+                                    </div>
+                                    <div class="row g-2 mb-2">
+                                        <div class="col-6">
+                                            <label class="form-label small fw-bold">Blood Group <span class="text-danger">*</span></label>
+                                            {{ form.blood_group }}
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label small fw-bold">Units Needed <span class="text-danger">*</span></label>
+                                            {{ form.units_needed }}
+                                        </div>
+                                    </div>
+                                    <div class="row g-2 mb-2">
+                                        <div class="col-6">
+                                            <label class="form-label small fw-bold">Contact Person <span class="text-danger">*</span></label>
+                                            <input type="text" name="contact_person" class="form-control form-control-sm" value="{{ logged_in_donor.full_name }}" required>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label small fw-bold">Phone Number <span class="text-danger">*</span></label>
+                                            <input type="text" name="contact_phone" class="form-control form-control-sm" value="{{ logged_in_donor.phone }}" required>
+                                        </div>
+                                    </div>
+                                    <div class="row g-2 mb-2">
+                                        <div class="col-6">
+                                            <label class="form-label small fw-bold">Required Date <span class="text-danger">*</span></label>
+                                            {{ form.required_date }}
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label small fw-bold">Urgency <span class="text-danger">*</span></label>
+                                            {{ form.urgency }}
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">Medical Case Details</label>
+                                        {{ form.case_detail }}
+                                    </div>
+                                    <button type="submit" class="btn btn-danger btn-sm w-100 fw-bold">
+                                        <i class="bi bi-broadcast me-1"></i> Submit Emergency Requisition for Patient
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <!-- HOSPITAL & GUEST EMERGENCY REQUISITION FORM -->
+                <div class="bg-white p-4 p-md-5 rounded-4 border shadow-sm sticky-top" style="top: 100px;">
+                    <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+                        <div class="rounded-circle bg-danger bg-opacity-10 text-danger p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <i class="bi bi-broadcast-pin fs-3"></i>
+                        </div>
+                        <div>
+                            <h4 class="fw-bold mb-0">Emergency Requisition</h4>
+                            <small class="text-muted">Broadcast patient blood requirement to database</small>
+                        </div>
+                    </div>
+
+                    <form method="POST" action="{% url 'request_blood' %}" id="bloodRequestForm">
+                        {% csrf_token %}
+                        <input type="hidden" name="district" id="reqDistrict" value="East Singhbhum">
+
+                        {% if form.errors %}
+                        <div class="alert alert-danger rounded-3 small mb-3">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <i class="bi bi-exclamation-triangle-fill text-danger fs-6"></i>
+                                <strong class="text-danger">Please correct the following errors:</strong>
+                            </div>
+                            <ul class="mb-0 ps-3">
+                                {% for field, errors in form.errors.items %}
+                                    {% for error in errors %}
+                                    <li><strong>{{ field|title }}:</strong> {{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+
+                        <!-- Selected Hospital Geofence Badge Indicator -->
+                        <div class="alert alert-success border-success border-2 p-2 rounded-3 small mb-3 {% if not logged_in_hospital %}d-none{% endif %}" id="geofenceVerificationBadge">
+                            <i class="bi bi-shield-check text-success me-1 fs-6"></i>
+                            <span id="geofenceBadgeText">
+                                {% if logged_in_hospital %}
+                                Verified Facility: <strong>{{ logged_in_hospital.name }}</strong> ({{ logged_in_hospital.locality }})
+                                {% else %}
+                                Verified East Singhbhum Hospital selected.
+                                {% endif %}
+                            </span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Select Registered Hospital <span class="text-danger">*</span></label>
+                            <select name="hospital" id="reqHospitalSelect" class="form-select border-danger" onchange="onHospitalDropdownChange(this)" required>
+                                <option value="">-- Choose Registered Hospital from Database --</option>
+                                {% if logged_in_hospital %}
+                                <optgroup label="Your Logged-In Healthcare Facility">
+                                    <option value="{{ logged_in_hospital.id }}" data-name="{{ logged_in_hospital.name }}" data-city="{{ logged_in_hospital.locality }}" data-phone="{{ logged_in_hospital.phone }}" selected>
+                                        ⭐ {{ logged_in_hospital.name }} ({{ logged_in_hospital.locality }}) &bull; Your Registered Facility
+                                    </option>
+                                </optgroup>
+                                {% endif %}
+                                <optgroup label="All Verified East Singhbhum Database Hospitals">
+                                    {% for h in hospitals %}
+                                    <option value="{{ h.id }}" data-name="{{ h.name }}" data-city="{{ h.locality }}" data-phone="{{ h.phone }}" {% if not logged_in_hospital and forloop.first %}selected{% endif %}>
+                                        {{ h.name }} ({{ h.locality }}) &bull; Registered Database Facility
+                                    </option>
+                                    {% endfor %}
+                                </optgroup>
+                            </select>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-7">
+                                <label class="form-label small fw-bold">Hospital Name &amp; Ward <span class="text-danger">*</span></label>
+                                {{ form.hospital_name }}
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label small fw-bold">Locality / City <span class="text-danger">*</span></label>
+                                {{ form.city }}
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-7">
+                                <label class="form-label small fw-bold">Patient Legal Name <span class="text-danger">*</span></label>
+                                {{ form.patient_name }}
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label small fw-bold">Blood Group <span class="text-danger">*</span></label>
+                                {{ form.blood_group }}
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Units Needed <span class="text-danger">*</span></label>
+                                {{ form.units_needed }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Required Date <span class="text-danger">*</span></label>
+                                {{ form.required_date }}
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Contact Person <span class="text-danger">*</span></label>
+                                {{ form.contact_person }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Phone Number <span class="text-danger">*</span></label>
+                                {{ form.contact_phone }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Urgency Priority <span class="text-danger">*</span></label>
+                            {{ form.urgency }}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold">Medical Case Details / Surgery Notes</label>
+                            {{ form.case_detail }}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary-red w-100 py-3 fw-bold shadow">
+                            <i class="bi bi-broadcast me-2"></i> Save &amp; Broadcast Requisition to Database
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- RIGHT COLUMN: ACTIVE REQUISITIONS FEED FROM DATABASE -->
+            <div class="col-lg-7">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                    <div>
+                        <h4 class="fw-bold mb-1">Live Database Requisitions</h4>
+                        <small class="text-muted">Real-time emergency pipeline fetched from SQLite backend</small>
+                    </div>
+                    <span class="badge bg-danger rounded-pill px-3 py-2 fw-bold">
+                        <i class="bi bi-database-check me-1"></i>{{ total_requests_count }} Active in DB
+                    </span>
+                </div>
+
+                <!-- Live Requisitions Filter Bar -->
+                <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-white">
+                    <form method="GET" action="{% url 'request_blood' %}#requisitionFormSection" class="row g-2 align-items-center">
+                        <div class="col-sm-4">
+                            <label class="form-label small fw-bold text-muted mb-1"><i class="bi bi-funnel me-1"></i>Urgency:</label>
+                            <select name="urgency" class="form-select form-select-sm" onchange="this.form.submit()">
+                                <option value="ALL" {% if current_urgency == 'ALL' %}selected{% endif %}>All Urgencies</option>
+                                <option value="Critical" {% if current_urgency == 'Critical' %}selected{% endif %}>Critical (&lt; 2h)</option>
+                                <option value="High" {% if current_urgency == 'High' %}selected{% endif %}>High Priority</option>
+                                <option value="Moderate" {% if current_urgency == 'Moderate' %}selected{% endif %}>Moderate</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-3">
+                            <label class="form-label small fw-bold text-muted mb-1"><i class="bi bi-droplet me-1"></i>Blood Group:</label>
+                            <select name="blood_group" class="form-select form-select-sm" onchange="this.form.submit()">
+                                <option value="ALL" {% if current_group == 'ALL' %}selected{% endif %}>All Groups</option>
+                                <option value="O+" {% if current_group == 'O+' %}selected{% endif %}>O+</option>
+                                <option value="O-" {% if current_group == 'O-' %}selected{% endif %}>O-</option>
+                                <option value="A+" {% if current_group == 'A+' %}selected{% endif %}>A+</option>
+                                <option value="A-" {% if current_group == 'A-' %}selected{% endif %}>A-</option>
+                                <option value="B+" {% if current_group == 'B+' %}selected{% endif %}>B+</option>
+                                <option value="B-" {% if current_group == 'B-' %}selected{% endif %}>B-</option>
+                                <option value="AB+" {% if current_group == 'AB+' %}selected{% endif %}>AB+</option>
+                                <option value="AB-" {% if current_group == 'AB-' %}selected{% endif %}>AB-</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-5">
+                            <label class="form-label small fw-bold text-muted mb-1"><i class="bi bi-search me-1"></i>Search Patient / Hospital:</label>
+                            <div class="input-group input-group-sm">
+                                <input type="text" name="q" class="form-control" placeholder="Name, code..." value="{{ search_q }}">
+                                <button class="btn btn-outline-danger" type="submit"><i class="bi bi-search"></i></button>
+                                {% if search_q or current_urgency != 'ALL' or current_group != 'ALL' %}
+                                <a href="{% url 'request_blood' %}#requisitionFormSection" class="btn btn-light border" title="Reset Filters"><i class="bi bi-x-lg"></i></a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Database Requests List -->
+                <div class="row g-3">
+                    {% for req in recent_requests %}
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm rounded-4 p-4 border-start border-4 {% if req.urgency == 'Critical' %}border-danger{% elif req.urgency == 'High' %}border-warning{% else %}border-primary{% endif %} bg-white">
+                            <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-danger fs-6 px-3 py-1 rounded-pill fw-bold">{{ req.blood_group }}</span>
+                                    <span class="badge bg-dark rounded-pill">{{ req.request_code }}</span>
+                                    {% if logged_in_hospital and req.hospital and req.hospital.id == logged_in_hospital.id %}
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill">
+                                        <i class="bi bi-hospital me-1"></i>My Hospital
+                                    </span>
+                                    {% endif %}
+                                    {% if user.is_authenticated and req.requested_by == user %}
+                                    <span class="badge bg-dark-subtle text-dark border rounded-pill">
+                                        <i class="bi bi-person-fill me-1"></i>Posted by You
+                                    </span>
+                                    {% endif %}
+                                    {% if logged_in_donor and req.blood_group == logged_in_donor.blood_group %}
+                                    <span class="badge bg-danger text-white border border-danger rounded-pill shadow-sm">
+                                        <i class="bi bi-heart-fill me-1"></i>Matches Your Group ({{ logged_in_donor.blood_group }})
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge {% if req.urgency == 'Critical' %}bg-danger-subtle text-danger border border-danger-subtle{% elif req.urgency == 'High' %}bg-warning-subtle text-dark border border-warning-subtle{% else %}bg-primary-subtle text-primary border border-primary-subtle{% endif %} px-3 py-1 rounded-pill fw-bold">
+                                        <i class="bi bi-alarm-fill me-1"></i>{{ req.urgency }}
+                                    </span>
+                                    <span class="badge bg-light text-muted border small">{{ req.created_at|timesince }} ago</span>
+                                </div>
+                            </div>
+
+                            <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
+                                <div>
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill small mb-1">
+                                        <i class="bi bi-person-heart me-1"></i>Admitted Patient
+                                    </span>
+                                    <h5 class="fw-bold text-dark mb-0">{{ req.patient_name }}</h5>
+                                </div>
+                                <span class="badge {% if req.status == 'In Progress' %}bg-warning text-dark{% elif req.status == 'Fulfilled' %}bg-success text-white{% else %}bg-secondary-subtle text-dark border{% endif %} px-3 py-1 rounded-pill">{{ req.status }}</span>
+                            </div>
+
+                            <p class="text-muted small mb-3">
+                                <i class="bi bi-hospital text-danger me-1"></i><strong>{{ req.hospital_name }}</strong> &bull;
+                                <i class="bi bi-geo-alt text-muted ms-1 me-1"></i>{{ req.city }} (East Singhbhum)
+                            </p>
+
+                            <div class="bg-light p-3 rounded-3 small mb-3">
+                                <div class="row g-2">
+                                    <div class="col-sm-4">
+                                        <span class="text-muted d-block">Units Required:</span>
+                                        <strong class="text-danger fs-6">{{ req.units_needed }} Unit{{ req.units_needed|pluralize }}</strong>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <span class="text-muted d-block">Coordinator Contact:</span>
+                                        <strong>{{ req.contact_person }}</strong>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <span class="text-muted d-block">Contact Phone:</span>
+                                        <a href="tel:{{ req.contact_phone }}" class="text-danger fw-bold text-decoration-none">
+                                            <i class="bi bi-telephone-fill me-1"></i>{{ req.contact_phone }}
+                                        </a>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <span class="text-muted d-block">Required By Date:</span>
+                                        <span class="fw-semibold text-dark">{{ req.required_date }}</span>
+                                    </div>
+                                    {% if req.case_detail %}
+                                    <div class="col-12 mt-2 pt-2 border-top">
+                                        <span class="text-muted d-block">Medical Case Notes:</span>
+                                        <span class="text-dark">{{ req.case_detail }}</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                    <i class="bi bi-shield-check me-1"></i> Geofence Verified &bull; East Singhbhum
+                                </span>
+                                <div class="d-flex gap-2">
+                                    {% if logged_in_donor %}
+                                    <button type="button" class="btn btn-danger btn-sm rounded-pill px-3 shadow-sm fw-bold" data-bs-toggle="modal" data-bs-target="#pledgeModal-{{ req.id }}">
+                                        <i class="bi bi-heart-pulse-fill me-1"></i> I Can Donate
+                                    </button>
+                                    {% endif %}
+                                    <a href="tel:{{ req.contact_phone }}" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                                        <i class="bi bi-telephone-fill me-1"></i> Call Coordinator
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if logged_in_donor %}
+                        <!-- Pledge & Donation Form Modal for Donor -->
+                        <div class="modal fade" id="pledgeModal-{{ req.id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content border-0 rounded-4 shadow">
+                                    <div class="modal-header bg-danger text-white border-0 py-3">
+                                        <h5 class="modal-title fw-bold">
+                                            <i class="bi bi-heart-pulse-fill me-2"></i>I Can Donate &bull; Donation Pledge Form
+                                        </h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <form method="POST" action="{% url 'pledge_donation' %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="request_id" value="{{ req.id }}">
+                                        
+                                        <div class="modal-body p-4">
+                                            <!-- Patient & Requisition Overview -->
+                                            <div class="alert alert-danger bg-danger-subtle border-danger border-2 p-3 rounded-3 small mb-3">
+                                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                                    <strong class="fs-6 text-dark"><i class="bi bi-person-fill text-danger me-1"></i>Patient: {{ req.patient_name }}</strong>
+                                                    <span class="badge bg-danger fs-6">{{ req.blood_group }}</span>
+                                                </div>
+                                                <div class="text-muted">
+                                                    <div><i class="bi bi-hospital me-1"></i>{{ req.hospital_name }} ({{ req.city }})</div>
+                                                    <div><i class="bi bi-alarm me-1"></i>Urgency: <strong class="text-danger">{{ req.urgency }}</strong> &bull; Need: <strong>{{ req.units_needed }} Unit{{ req.units_needed|pluralize }}</strong></div>
+                                                    <div><i class="bi bi-telephone-fill text-success me-1"></i>Coordinator: {{ req.contact_person }} ({{ req.contact_phone }})</div>
+                                                </div>
+                                            </div>
+
+                                            <p class="small text-muted mb-3">
+                                                Fill in your pledge details below. When you click <strong>Confirm Pledge</strong>, your donation record will be saved and your <strong>Donor Dashboard</strong> will be updated immediately.
+                                            </p>
+
+                                            <!-- Donor Input Fields -->
+                                            <div class="row g-2 mb-3">
+                                                <div class="col-6">
+                                                    <label class="form-label small fw-bold">Units to Donate <span class="text-danger">*</span></label>
+                                                    <select name="units" class="form-select form-select-sm" required>
+                                                        <option value="1" selected>1 Unit (Whole Blood)</option>
+                                                        <option value="2">2 Units</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-6">
+                                                    <label class="form-label small fw-bold">Pledge / Donation Date <span class="text-danger">*</span></label>
+                                                    <input type="date" name="donation_date" class="form-control form-control-sm" value="{% now 'Y-m-d' %}" required>
+                                                </div>
+                                            </div>
+
+                                            <div class="row g-2 mb-3">
+                                                <div class="col-6">
+                                                    <label class="form-label small fw-bold">Preferred Time Slot <span class="text-danger">*</span></label>
+                                                    <select name="time_slot" class="form-select form-select-sm" required>
+                                                        <option value="Immediate Emergency" selected>Immediate Emergency</option>
+                                                        <option value="Morning (09:00 AM - 12:00 PM)">Morning (09:00 - 12:00)</option>
+                                                        <option value="Afternoon (12:00 PM - 03:00 PM)">Afternoon (12:00 - 03:00)</option>
+                                                        <option value="Evening (03:00 PM - 06:00 PM)">Evening (03:00 - 06:00)</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-6">
+                                                    <label class="form-label small fw-bold">Donor Phone Number <span class="text-danger">*</span></label>
+                                                    <input type="text" name="phone" class="form-control form-control-sm" value="{{ logged_in_donor.phone }}" required>
+                                                </div>
+                                            </div>
+
+                                            <div class="mb-2">
+                                                <label class="form-label small fw-bold">Message / Notes to Hospital Coordinator</label>
+                                                <input type="text" name="notes" class="form-control form-control-sm" placeholder="e.g. Will reach hospital blood bank at 4 PM">
+                                            </div>
+                                        </div>
+
+                                        <div class="modal-footer border-0 bg-light py-2">
+                                            <button type="button" class="btn btn-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                                            <a href="tel:{{ req.contact_phone }}" class="btn btn-outline-success btn-sm rounded-pill px-3">
+                                                <i class="bi bi-telephone-fill me-1"></i> Call First
+                                            </a>
+                                            <button type="submit" class="btn btn-danger btn-sm rounded-pill px-4 fw-bold shadow">
+                                                <i class="bi bi-check2-circle me-1"></i> Confirm Pledge &amp; Update Dashboard
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <div class="col-12 text-center py-5 bg-white rounded-4 border">
+                        <i class="bi bi-inbox text-muted fs-1 mb-2 d-block"></i>
+                        <h5 class="fw-bold">No Matching Requests in Database</h5>
+                        <p class="text-muted small">No blood requisitions match your filter criteria. Use the form on the left to post a new patient request.</p>
+                        {% if search_q or current_urgency != 'ALL' or current_group != 'ALL' %}
+                        <a href="{% url 'request_blood' %}#requisitionFormSection" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                            <i class="bi bi-arrow-repeat me-1"></i> Reset Filters
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- GEOFENCE AUDIT MODAL -->
+<div class="modal fade" id="geofenceAuditModal" tabindex="-1" aria-labelledby="geofenceAuditModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header bg-dark text-white border-0 py-3">
+                <h5 class="modal-title fw-bold" id="geofenceAuditModalLabel">
+                    <i class="bi bi-shield-check text-danger me-2"></i>East Singhbhum District Geofence Verification Audit
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="alert alert-danger bg-danger-subtle border-danger small mb-3">
+                    <strong>Geographic Filtering Policy:</strong>
+                    Hospital GPS coordinates are tested against the official boundary polygon of East Singhbhum (Census Code 357 / Relation ID: 1972030) using the <strong>Ray-Casting Algorithm</strong>. Only hospitals falling strictly inside the geofence boundary are displayed. Neighboring districts (Seraikela-Kharsawan, West Singhbhum, Ranchi) are mathematically excluded.
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle small mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Hospital Name</th>
+                                <th>Locality</th>
+                                <th>Coordinates</th>
+                                <th>Geofence Result</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for h in hospitals %}
+                            <tr>
+                                <td><strong>{{ h.name }}</strong></td>
+                                <td>{{ h.locality }}</td>
+                                <td class="font-monospace text-danger">{{ h.latitude|floatformat:4 }}°N, {{ h.longitude|floatformat:4 }}°E</td>
+                                <td><span class="badge bg-success text-white"><i class="bi bi-check-circle-fill me-1"></i>Verified Inside</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer border-0 bg-light py-2">
+                <button type="button" class="btn btn-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let hospitalMap = null;
+    let hospitalMarkers = {};
+
+    document.addEventListener("DOMContentLoaded", function() {
+        initMap();
+        setupSearchAndFilters();
+
+        const select = document.getElementById('reqHospitalSelect');
+        if (select && select.value) {
+            const opt = select.options[select.selectedIndex];
+            if (opt && opt.value) {
+                selectHospitalForRequest(opt.value, opt.getAttribute('data-name'), opt.getAttribute('data-city'), opt.getAttribute('data-phone'), false);
+            }
+        }
+    });
+
+    function initMap() {
+        const defaultCenter = [22.75, 86.32];
+        hospitalMap = L.map('hospitalMap', {
+            center: defaultCenter,
+            zoom: 10,
+            scrollWheelZoom: false
+        });
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors | LifeStream Geofence'
+        }).addTo(hospitalMap);
+
+        // Fetch Geofence Polygon from Django API
+        fetch("{% url 'api_geofence' %}")
+            .then(res => res.json())
+            .then(data => {
+                if (data.coordinates) {
+                    const latlngs = data.coordinates.map(pt => [pt[1], pt[0]]);
+                    const polygon = L.polygon(latlngs, {
+                        color: '#dc2626',
+                        weight: 2.5,
+                        dashArray: '6, 6',
+                        fillColor: '#ef4444',
+                        fillOpacity: 0.08
+                    }).addTo(hospitalMap);
+                    hospitalMap.fitBounds(polygon.getBounds(), { padding: [25, 25] });
+                }
+            })
+            .catch(err => console.warn(err));
+
+        // Fetch Verified Hospitals from Django API
+        fetch("{% url 'api_hospitals' %}")
+            .then(res => res.json())
+            .then(data => {
+                data.facilities.forEach(h => {
+                    const markerIcon = L.divIcon({
+                        className: 'custom-hospital-marker-wrapper',
+                        html: `<div class="hospital-marker-pin" id="marker-${h.id}"><i class="bi bi-hospital-fill"></i></div>`,
+                        iconSize: [36, 36],
+                        iconAnchor: [18, 36],
+                        popupAnchor: [0, -36]
+                    });
+
+                    const marker = L.marker([h.lat, h.lon], { icon: markerIcon }).addTo(hospitalMap);
+                    
+                    const popupHtml = `
+                        <div class="p-1">
+                            <span class="badge bg-danger rounded-pill mb-1">${h.locality}</span>
+                            <h6 class="fw-bold mb-1">${h.name}</h6>
+                            <p class="small text-muted mb-2">${h.address}</p>
+                            <div class="small bg-light p-2 rounded mb-2">
+                                <div><strong>GPS:</strong> ${h.lat.toFixed(4)}°N, ${h.lon.toFixed(4)}°E</div>
+                                <div><strong>Blood Bank:</strong> ${h.bloodBankStatus}</div>
+                                <div><strong>Stock:</strong> ${h.availableUnits} units</div>
+                            </div>
+                            <div class="small mb-2"><i class="bi bi-telephone-fill text-success me-1"></i>${h.phone}</div>
+                            <button class="btn btn-sm btn-primary-red w-100" onclick="locateAndSelect('${h.id}')">Select for Requisition</button>
+                        </div>
+                    `;
+                    marker.bindPopup(popupHtml, { maxWidth: 300 });
+                    hospitalMarkers[h.id] = marker;
+                });
+            });
+    }
+
+    function locateHospitalOnMap(id, lat, lon) {
+        if (!hospitalMap) return;
+        hospitalMap.setView([lat, lon], 14, { animate: true });
+        if (hospitalMarkers[id]) {
+            hospitalMarkers[id].openPopup();
+        }
+        document.getElementById('geofenceMapSection').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function selectHospitalForRequest(id, name, locality, phone, shouldScroll = true) {
+        const select = document.getElementById('reqHospitalSelect');
+        const nameInput = document.getElementById('reqHospitalName');
+        const cityInput = document.getElementById('reqCity');
+        const phoneInput = document.getElementById('reqContactPhone');
+        const badge = document.getElementById('geofenceVerificationBadge');
+        const badgeText = document.getElementById('geofenceBadgeText');
+
+        if (select) select.value = id;
+        if (nameInput) nameInput.value = `${name}, Emergency / Inpatient Ward`;
+        if (cityInput) cityInput.value = `${locality}, East Singhbhum`;
+        if (phoneInput && !phoneInput.value) phoneInput.value = phone;
+
+        if (badge && badgeText) {
+            badgeText.innerHTML = `<strong>Geofence Verified:</strong> ${name} is inside East Singhbhum boundary.`;
+            badge.classList.remove('d-none');
+        }
+
+        if (shouldScroll) {
+            const formSection = document.getElementById('requisitionFormSection');
+            if (formSection) formSection.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
+    function locateAndSelect(id) {
+        const select = document.getElementById('reqHospitalSelect');
+        if (select) {
+            let foundOpt = Array.from(select.options).find(o => o.value == id || o.getAttribute('data-id') == id);
+            if (foundOpt) {
+                select.value = foundOpt.value;
+                selectHospitalForRequest(foundOpt.value, foundOpt.getAttribute('data-name'), foundOpt.getAttribute('data-city'), foundOpt.getAttribute('data-phone'));
+            }
+        }
+    }
+
+    function onHospitalDropdownChange(select) {
+        const opt = select.options[select.selectedIndex];
+        if (opt.value) {
+            selectHospitalForRequest(opt.value, opt.getAttribute('data-name'), opt.getAttribute('data-city'), opt.getAttribute('data-phone'));
+        }
+    }
+
+    function setupSearchAndFilters() {
+        const searchInput = document.getElementById('hospitalSearchInput');
+        const clearBtn = document.getElementById('clearHospitalSearchBtn');
+        const cards = document.querySelectorAll('.hospital-card-item');
+        const countBadge = document.getElementById('hospitalCountBadge');
+
+        function applyFilter() {
+            const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
+            const activeLocalityBtn = document.querySelector('.locality-filter-btn.active');
+            const locality = activeLocalityBtn ? activeLocalityBtn.getAttribute('data-locality') : 'ALL';
+
+            let visibleCount = 0;
+            cards.forEach(card => {
+                const cardLoc = card.getAttribute('data-locality');
+                const cardName = card.getAttribute('data-name');
+
+                let locMatch = (locality === 'ALL');
+                if (locality === 'Telco') locMatch = cardLoc.includes('Telco') || cardLoc.includes('Golmuri');
+                else if (locality === 'Mango') locMatch = cardLoc.includes('Mango') || cardLoc.includes('Tamolia');
+                else if (locality === 'Baridih') locMatch = cardLoc.includes('Baridih');
+                else if (locality === 'Jugsalai') locMatch = cardLoc.includes('Jugsalai') || cardLoc.includes('Khasmahal');
+                else if (locality !== 'ALL') locMatch = cardLoc.toLowerCase().includes(locality.toLowerCase());
+
+                const textMatch = !query || cardName.includes(query) || cardLoc.toLowerCase().includes(query);
+
+                if (locMatch && textMatch) {
+                    card.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            if (countBadge) {
+                countBadge.textContent = `${visibleCount} Verified`;
+            }
+        }
+
+        if (searchInput) searchInput.addEventListener('input', applyFilter);
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                if (searchInput) searchInput.value = '';
+                applyFilter();
+            });
+        }
+
+        document.querySelectorAll('.locality-filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.locality-filter-btn').forEach(b => {
+                    b.classList.remove('btn-danger', 'active');
+                    b.classList.add('btn-outline-danger');
+                });
+                btn.classList.add('btn-danger', 'active');
+                btn.classList.remove('btn-outline-danger');
+                applyFilter();
+            });
+        });
+    }
+</script>
+{% endblock %}

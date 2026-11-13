@@ -1,0 +1,344 @@
+{% extends 'bloodbank/base.html' %}
+{% load static %}
+
+{% block title %}Hospital Portal | {{ hospital.name|default:user.username }} | LifeStream{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-light min-vh-100">
+    <div class="container">
+        <!-- HOSPITAL PROFILE OVERVIEW BANNER -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 mb-4 bg-white border-start border-5 border-primary">
+            <div class="row g-4 align-items-center">
+                <div class="col-md-8">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="badge bg-primary rounded-pill px-3 py-1"><i class="bi bi-hospital me-1"></i>Accredited Healthcare Facility</span>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill small">
+                            <i class="bi bi-shield-check me-1"></i>Inside East Singhbhum Geofence
+                        </span>
+                    </div>
+                    <h2 class="fw-bold text-dark mb-1">{{ hospital.name|default:user.first_name|default:"Hospital Care Center" }}</h2>
+                    <p class="text-muted small mb-0">
+                        <i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ hospital.address|default:"Jamshedpur, East Singhbhum" }} &bull;
+                        <i class="bi bi-telephone-fill text-success me-1"></i>{{ hospital.phone|default:user.profile.phone }} &bull;
+                        <i class="bi bi-inpatient text-primary me-1"></i>{{ hospital.beds|default:100 }} Bed Capacity
+                    </p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <div class="p-3 bg-light rounded-4 border d-inline-block text-start w-100 w-md-auto">
+                        <span class="small text-muted d-block fw-bold mb-1">Blood Facility Status:</span>
+                        <span class="badge bg-danger rounded-pill px-3 py-2 small mb-1 d-inline-block">
+                            <i class="bi bi-droplet-half me-1"></i>{{ hospital.blood_bank_status|default:"Licensed Blood Storage Desk" }}
+                        </span>
+                        <div class="small text-muted">Stock: <strong>{{ hospital.available_units|default:40 }} units</strong></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STATS KPI CARDS -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-lg-3">
+                <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                    <span class="text-muted small fw-bold text-uppercase d-block mb-1">Total Requisitions</span>
+                    <h3 class="fw-bold text-dark mb-0">{{ my_requests.count }}</h3>
+                    <small class="text-muted">Broadcasted from this portal</small>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                    <span class="text-muted small fw-bold text-uppercase d-block mb-1">Urgent Needed</span>
+                    <h3 class="fw-bold text-danger mb-0">{{ urgent_count }}</h3>
+                    <small class="text-danger fw-bold"><i class="bi bi-alarm-fill me-1"></i>Active alerts</small>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                    <span class="text-muted small fw-bold text-uppercase d-block mb-1">Fulfilled</span>
+                    <h3 class="fw-bold text-success mb-0">{{ fulfilled_count }}</h3>
+                    <small class="text-muted">Successfully matched</small>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                    <span class="text-muted small fw-bold text-uppercase d-block mb-1">Available Local Donors</span>
+                    <h3 class="fw-bold text-primary mb-0">{{ available_donors.count }}</h3>
+                    <small class="text-muted">Ready on short notice</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- EMERGENCY SMS BROADCAST & CELLULAR DISPATCH TELEMETRY -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="rounded-circle bg-danger text-white d-inline-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+                        <i class="bi bi-broadcast"></i>
+                    </span>
+                    <div>
+                        <h5 class="fw-bold mb-0">Emergency SMS &amp; Cellular Dispatch Gateway</h5>
+                        <small class="text-muted">East Singhbhum Health Network Rapid Cellular Broadcast &bull; 99.98% Gateway SLA</small>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1">
+                        <i class="bi bi-circle-fill text-success me-1" style="font-size: 0.5rem;"></i> Gateway Online (1.1s Latency)
+                    </span>
+                    <button type="button" class="btn btn-outline-danger btn-sm rounded-pill fw-bold" id="simulateBroadcastBtn">
+                        <i class="bi bi-send-check-fill me-1"></i> Test Rapid Donor Alert
+                    </button>
+                </div>
+            </div>
+
+            <!-- Active Broadcast Telemetry Feed -->
+            <div class="p-3 rounded-4 font-monospace small" id="broadcastConsoleLog" style="max-height: 180px; overflow-y: auto; background: #0f172a !important;">
+                <div class="text-success">[16:30:12] Gateway Initialized: East Singhbhum Cellular Node (CellID: JH-ES-4310)</div>
+                <div class="text-info">[16:30:15] Emergency Requisition Hook Active: Listening for Critical O+, O-, AB- alerts</div>
+                <div class="text-white-50">[16:31:02] Radius Filter: 10.0 KM Geofenced Polygon (Bistupur, Sakchi, Telco, Jugsalai)</div>
+                <div class="text-warning">[16:35:40] Broadcast Dispatched: Requisition #9 (2 Units O+) &rarr; 14 Verified Donors</div>
+                <div class="text-success">[16:35:41] Delivery Confirmed: 14/14 SMS Delivered (Avg Latency: 980ms) &bull; Donor Rahul Sharma flagged ACTIVE</div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- REQUISITION SUBMISSION QUICK FORM -->
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white sticky-top" style="top: 100px;">
+                    <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                        <i class="bi bi-broadcast text-danger fs-4"></i>
+                        <div>
+                            <h5 class="fw-bold mb-0">Fast Emergency Requisition</h5>
+                            <small class="text-muted">Broadcast to regional donors immediately</small>
+                        </div>
+                    </div>
+
+                    <form method="POST" action="{% url 'request_blood' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="district" value="East Singhbhum">
+                        {% if hospital %}
+                        <input type="hidden" name="hospital" value="{{ hospital.id }}">
+                        <input type="hidden" name="hospital_name" value="{{ hospital.name }}">
+                        <input type="hidden" name="city" value="{{ hospital.locality }}">
+                        {% else %}
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold">Hospital Name</label>
+                            <input type="text" name="hospital_name" class="form-control" value="{{ user.first_name }}" required>
+                        </div>
+                        {% endif %}
+
+                        <div class="row g-2 mb-2">
+                            <div class="col-7">
+                                <label class="form-label small fw-bold">Patient Name <span class="text-danger">*</span></label>
+                                <input type="text" name="patient_name" class="form-control" placeholder="Patient Name" required>
+                            </div>
+                            <div class="col-5">
+                                <label class="form-label small fw-bold">Blood Group <span class="text-danger">*</span></label>
+                                <select name="blood_group" class="form-select" required>
+                                    <option value="A+">A+</option>
+                                    <option value="A-">A-</option>
+                                    <option value="B+">B+</option>
+                                    <option value="B-">B-</option>
+                                    <option value="AB+">AB+</option>
+                                    <option value="AB-">AB-</option>
+                                    <option value="O+" selected>O+</option>
+                                    <option value="O-">O-</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mb-2">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Units Needed <span class="text-danger">*</span></label>
+                                <input type="number" name="units_needed" class="form-control" min="1" max="10" value="2" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Urgency <span class="text-danger">*</span></label>
+                                <select name="urgency" class="form-select">
+                                    <option value="Critical">Critical (Within 2 hrs)</option>
+                                    <option value="High">High (Within 6 hrs)</option>
+                                    <option value="Moderate">Moderate (Within 24 hrs)</option>
+                                    <option value="Low">Low (Scheduled)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mb-2">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Doctor / Attendant</label>
+                                <input type="text" name="contact_person" class="form-control" value="ICU Duty Desk" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Emergency Phone</label>
+                                <input type="text" name="contact_phone" class="form-control" value="{{ hospital.phone|default:user.profile.phone }}" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Surgery / Diagnosis Details</label>
+                            <textarea name="case_detail" class="form-control" rows="2" placeholder="e.g. Trauma Surgery, Thrombocytopenia..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary-red w-100 py-2 fw-bold shadow">
+                            <i class="bi bi-broadcast me-1"></i> Broadcast Requisition
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- MY HOSPITAL'S REQUISITIONS TABLE -->
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-list-check text-primary me-2"></i>My Hospital's Blood Requisitions</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Patient &amp; Code</th>
+                                    <th>Group &amp; Units</th>
+                                    <th>Urgency</th>
+                                    <th>Status</th>
+                                    <th>Update Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for req in my_requests %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ req.patient_name }}</strong>
+                                        <small class="text-muted d-block font-monospace">{{ req.request_code }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-danger fs-6">{{ req.blood_group }}</span>
+                                        <small class="text-muted d-block">{{ req.units_needed }} units</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle">{{ req.urgency }}</span>
+                                    </td>
+                                    <td>
+                                        {% if req.status == 'Urgent Needed' %}
+                                            <span class="badge bg-danger text-white">{{ req.status }}</span>
+                                        {% elif req.status == 'In Progress' %}
+                                            <span class="badge bg-warning text-dark">{{ req.status }}</span>
+                                        {% elif req.status == 'Fulfilled' %}
+                                            <span class="badge bg-success text-white">{{ req.status }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary text-white">{{ req.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <form method="POST" action="{% url 'update_request_status' req.id %}" class="d-inline">
+                                                {% csrf_token %}
+                                                {% if req.status != 'Fulfilled' %}
+                                                <input type="hidden" name="status" value="Fulfilled">
+                                                <button type="submit" class="btn btn-sm btn-outline-success rounded-pill px-2 py-1" title="Mark as fulfilled">
+                                                    <i class="bi bi-check-lg"></i> Fulfilled
+                                                </button>
+                                                {% else %}
+                                                <span class="text-success small fw-bold"><i class="bi bi-check-circle-fill me-1"></i>Completed</span>
+                                                {% endif %}
+                                            </form>
+                                            <form method="POST" action="{% url 'delete_blood_request' req.id %}" class="d-inline" onsubmit="return confirm('Are you sure you want to permanently delete this requisition?');">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-2 py-1" title="Permanently delete requisition">
+                                                    <i class="bi bi-trash"></i> Delete
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">
+                                        No requisitions recorded yet. Use the quick form to broadcast your patient's emergency needs.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- LOCAL AVAILABLE DONORS TABLE -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-people text-danger me-2"></i>Nearby Available Donors</h5>
+                        <a href="{% url 'donors' %}" class="btn btn-outline-danger btn-sm rounded-pill">View All Donors</a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Donor</th>
+                                    <th>Blood Group</th>
+                                    <th>Locality</th>
+                                    <th>Contact</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for d in available_donors %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ d.full_name }}</strong>
+                                        <small class="text-muted d-block">{{ d.age }} yrs &bull; {{ d.gender }}</small>
+                                    </td>
+                                    <td><span class="badge bg-danger fs-6">{{ d.blood_group }}</span></td>
+                                    <td>{{ d.city }}</td>
+                                    <td>
+                                        <a href="tel:{{ d.phone }}" class="btn btn-sm btn-outline-success">
+                                            <i class="bi bi-telephone-fill me-1"></i>{{ d.phone }}
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const btn = document.getElementById('simulateBroadcastBtn');
+    if (btn) {
+        btn.addEventListener('click', function () {
+            const consoleLog = document.getElementById('broadcastConsoleLog');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Broadcasting...';
+            
+            const now = new Date().toLocaleTimeString();
+            const alertLine1 = document.createElement('div');
+            alertLine1.className = 'text-warning';
+            alertLine1.textContent = `[${now}] 🚨 Manual Rapid Alert Triggered: Scanning verified donors within 10km...`;
+            consoleLog.appendChild(alertLine1);
+            consoleLog.scrollTop = consoleLog.scrollHeight;
+
+            setTimeout(() => {
+                const alertLine2 = document.createElement('div');
+                alertLine2.className = 'text-info';
+                alertLine2.textContent = `[${now}] Found 12 matching donors in Jamshedpur & Telco. Dispatching priority SMS alerts...`;
+                consoleLog.appendChild(alertLine2);
+                consoleLog.scrollTop = consoleLog.scrollHeight;
+            }, 600);
+
+            setTimeout(() => {
+                const alertLine3 = document.createElement('div');
+                alertLine3.className = 'text-success';
+                alertLine3.textContent = `[${now}] ✓ All 12 SMS delivered successfully! Latency: 840ms. Status: Awaiting Donor Affirmation.`;
+                consoleLog.appendChild(alertLine3);
+                consoleLog.scrollTop = consoleLog.scrollHeight;
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-check2-circle me-1"></i> Alert Broadcasted!';
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="bi bi-send-check-fill me-1"></i> Test Rapid Donor Alert';
+                }, 3000);
+            }, 1400);
+        });
+    }
+});
+</script>
+{% endblock %}

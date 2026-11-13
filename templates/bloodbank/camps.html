@@ -1,0 +1,149 @@
+{% extends 'bloodbank/base.html' %}
+{% load static %}
+
+{% block title %}Donation Camps & Community Drives | LifeStream{% endblock %}
+
+{% block content %}
+<!-- INNER HEADER BANNER -->
+<section class="inner-page-header">
+    <div class="container position-relative" style="z-index: 2;">
+        <div class="breadcrumb-custom">
+            <a href="{% url 'home' %}"><i class="bi bi-house"></i> Home</a>
+            <i class="bi bi-chevron-right text-white-50"></i>
+            <span>Donation Drives</span>
+        </div>
+        <h1>Community Blood Donation Camps</h1>
+        <p>Find organized donation drives near you, register with one click, and help replenish hospital component reserves.</p>
+    </div>
+</section>
+
+<!-- CAMPS DIRECTORY SECTION -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold mb-1">Scheduled Blood Donation Camps <span class="badge bg-danger rounded-pill fs-6 ms-1">{{ total_camps }} Active</span></h4>
+                <small class="text-muted">Conducted by authorized medical colleges, Rotary/Lions clubs, and municipal red cross chapters.</small>
+            </div>
+            {% if is_admin_role or user.is_superuser %}
+            <a href="/admin/bloodbank/donationcamp/add/" target="_blank" class="btn btn-primary-red btn-sm rounded-pill">
+                <i class="bi bi-plus-circle me-1"></i> Add New Camp in Admin
+            </a>
+            {% endif %}
+        </div>
+
+        <div class="row g-4">
+            {% for camp in camps %}
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="position-relative">
+                            <img src="{{ camp.image_url }}" alt="{{ camp.title }}" class="w-100" style="height: 200px; object-fit: cover;">
+                            <span class="badge bg-dark bg-opacity-75 text-white position-absolute top-0 end-0 m-3 px-3 py-2 rounded-pill small">
+                                <i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ camp.city }}
+                            </span>
+                        </div>
+
+                        <div class="p-4">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">
+                                    <i class="bi bi-calendar3 me-1"></i>{{ camp.date|date:"D, d M Y" }}
+                                </span>
+                                <span class="badge bg-light text-muted border rounded-pill">
+                                    <i class="bi bi-clock me-1"></i>{{ camp.time_slot }}
+                                </span>
+                            </div>
+
+                            <h5 class="fw-bold text-dark mb-2">{{ camp.title }}</h5>
+                            <p class="small text-danger fw-semibold mb-2">
+                                <i class="bi bi-building me-1"></i>Organized by: {{ camp.organizer }}
+                            </p>
+                            <p class="small text-muted mb-3">
+                                <i class="bi bi-geo-alt text-muted me-1"></i><strong>Venue:</strong> {{ camp.venue }}
+                            </p>
+                            <p class="small text-muted mb-3">{{ camp.description }}</p>
+
+                            <!-- Progress of Registrations -->
+                            <div class="bg-light p-3 rounded-3 mb-3">
+                                <div class="d-flex justify-content-between small text-muted mb-1">
+                                    <span>Registered Donors: <strong>{{ camp.registered_count }}</strong></span>
+                                    <span>Target: <strong>{{ camp.target_units }} Units</strong></span>
+                                </div>
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar bg-danger" role="progressbar" style="width: {% widthratio camp.registered_count camp.target_units 100 %}%;" aria-valuenow="{{ camp.registered_count }}" aria-valuemin="0" aria-valuemax="{{ camp.target_units }}"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 pt-0 border-top mt-auto">
+                        <button type="button" class="btn btn-primary-red w-100 py-2 rounded-pill fw-bold" data-bs-toggle="modal" data-bs-target="#registerCampModal{{ camp.id }}">
+                            <i class="bi bi-check-circle me-1"></i> Register for This Camp
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REGISTRATION MODAL FOR EACH CAMP -->
+            <div class="modal fade" id="registerCampModal{{ camp.id }}" tabindex="-1" aria-labelledby="modalLabel{{ camp.id }}" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content rounded-4 border-0 shadow">
+                        <div class="modal-header bg-dark text-white border-0 py-3">
+                            <h5 class="modal-title fw-bold" id="modalLabel{{ camp.id }}">
+                                <i class="bi bi-calendar-check text-danger me-2"></i>Camp Registration
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form method="POST" action="{% url 'register_camp' camp.id %}">
+                            {% csrf_token %}
+                            <div class="modal-body p-4">
+                                <h6 class="fw-bold mb-1">{{ camp.title }}</h6>
+                                <p class="small text-muted mb-3"><i class="bi bi-calendar-event me-1"></i>{{ camp.date|date:"l, d F Y" }} &bull; {{ camp.venue }}</p>
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Full Legal Name <span class="text-danger">*</span></label>
+                                    <input type="text" name="full_name" class="form-control" value="{% if user.is_authenticated %}{{ user.first_name }} {{ user.last_name }}{% endif %}" placeholder="e.g. Rahul Sharma" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Phone Number <span class="text-danger">*</span></label>
+                                    <input type="text" name="phone" class="form-control" value="{% if user.is_authenticated and user.profile.phone %}{{ user.profile.phone }}{% endif %}" placeholder="+91 98765 43210" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Your Blood Group <span class="text-danger">*</span></label>
+                                    <select name="blood_group" class="form-select">
+                                        <option value="A+">A+</option>
+                                        <option value="A-">A-</option>
+                                        <option value="B+">B+</option>
+                                        <option value="B-">B-</option>
+                                        <option value="AB+">AB+</option>
+                                        <option value="AB-">AB-</option>
+                                        <option value="O+" selected>O+</option>
+                                        <option value="O-">O-</option>
+                                    </select>
+                                </div>
+
+                                <div class="alert alert-light border small text-muted mb-0">
+                                    <i class="bi bi-shield-check text-success me-1"></i>Free pre-donation health checkup, donor kit, certificate, and refreshments provided upon arrival.
+                                </div>
+                            </div>
+                            <div class="modal-footer border-0 bg-light py-2">
+                                <button type="button" class="btn btn-secondary btn-sm rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-primary-red btn-sm rounded-pill px-4">Confirm Registration</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5 bg-white rounded-4 border">
+                <i class="bi bi-calendar-x text-muted fs-1 mb-2 d-block"></i>
+                <h5 class="fw-bold">No Scheduled Camps</h5>
+                <p class="text-muted small">New donation drives will be announced soon.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

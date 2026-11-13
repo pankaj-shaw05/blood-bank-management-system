@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | LifeStream Blood Bank Management System</title>
+
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- NAVBAR (MINIMAL BRAND HEADER) -->
+    <nav class="navbar navbar-expand-lg bg-white border-bottom py-3">
+        <div class="container">
+            <a class="navbar-brand-logo" href="index.html">
+                <div class="logo-icon-box">
+                    <i class="bi bi-droplet-half"></i>
+                </div>
+                <div>
+                    <div class="logo-text-title">Life<span>Stream</span></div>
+                    <span class="logo-tagline">Blood Bank Network</span>
+                </div>
+            </a>
+
+            <div class="d-flex align-items-center gap-2">
+                <span class="text-muted small d-none d-sm-inline">New to LifeStream?</span>
+                <a href="signup.html" class="btn btn-outline-red btn-sm">
+                    <i class="bi bi-person-plus-fill"></i> Create Account
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- AUTHENTICATION CONTAINER -->
+    <div class="auth-wrapper">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-xl-10">
+                    <div class="auth-card">
+                        <div class="row g-0">
+                            <!-- SIDEBAR ILLUSTRATION & HIGHLIGHTS -->
+                            <div class="col-lg-5 auth-sidebar">
+                                <div>
+                                    <div class="badge-pulse bg-danger text-white mb-3">
+                                        <i class="bi bi-shield-check me-1"></i> Secure Health Gateway
+                                    </div>
+                                    <h3 class="fw-bold mb-3">Connecting Compassion With Immediate Need</h3>
+                                    <p class="text-white-50 small mb-4">
+                                        Log in to access your donation history, update your blood availability status, or manage hospital blood requisitions in real time.
+                                    </p>
+
+                                    <div class="p-3 rounded-3 bg-white bg-opacity-10 border border-white border-opacity-25 mb-3">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <i class="bi bi-award text-warning fs-3"></i>
+                                            <div>
+                                                <strong class="d-block text-white small">LifeSaver Digital Badge</strong>
+                                                <small class="text-white-50">Earn recognitions for repeat voluntary donations</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="pt-4 border-top border-white border-opacity-25 small text-white-50">
+                                    <i class="bi bi-telephone-fill text-danger me-1"></i> 24/7 Helpline: 1800-RED-LIFE (1800-733-5433)
+                                </div>
+                            </div>
+
+                            <!-- LOGIN FORM CONTAINER -->
+                            <div class="col-lg-7 auth-form-container">
+                                <div class="mb-4">
+                                    <h3 class="fw-bold mb-1">Sign In</h3>
+                                    <p class="text-muted small">Select your portal access role and enter your credentials.</p>
+                                </div>
+
+                                <!-- ROLE SELECTOR PILLS (DONOR & HOSPITAL ONLY) -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold small text-muted">Select Your Role:</label>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <div class="flex-grow-1">
+                                            <input type="radio" class="btn-check" name="authRole" id="roleDonor" value="Donor" checked>
+                                            <label class="btn btn-outline-danger w-100 btn-sm py-2" for="roleDonor">
+                                                <i class="bi bi-person-heart me-1"></i> Blood Donor
+                                            </label>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <input type="radio" class="btn-check" name="authRole" id="roleHospital" value="Hospital">
+                                            <label class="btn btn-outline-danger w-100 btn-sm py-2" for="roleHospital">
+                                                <i class="bi bi-hospital me-1"></i> Hospital / Clinic
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- LOGIN FORM -->
+                                <form id="loginForm">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold small" for="loginEmail">Email Address or Username <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light"><i class="bi bi-person-circle text-muted"></i></span>
+                                            <input type="text" class="form-control" id="loginEmail" placeholder="e.g. mgm, tata_hospital, or email@example.com" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <label class="form-label fw-bold small mb-0" for="loginPassword">Password <span class="text-danger">*</span></label>
+                                            <a href="#" class="small text-danger text-decoration-none" onclick="showToast('Password reset link simulated to your email.', 'info', 'bi-envelope')">Forgot Password?</a>
+                                        </div>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light"><i class="bi bi-key text-muted"></i></span>
+                                            <input type="password" class="form-control" id="loginPassword" placeholder="Enter your password" required>
+                                            <button class="btn btn-light border password-toggle-btn" type="button" data-target="loginPassword" aria-label="Toggle password view">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex align-items-center justify-content-between mb-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="rememberMeCheck" checked>
+                                            <label class="form-check-label small text-muted" for="rememberMeCheck">Keep me signed in</label>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary-red w-100 py-3 mb-3 fs-6">
+                                        <i class="bi bi-box-arrow-in-right"></i> Sign In to Account
+                                    </button>
+                                </form>
+
+                                <!-- ONE-CLICK DEMO ACCOUNTS HELPER -->
+                                <div class="p-3 bg-light rounded-3 border mb-3">
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <span class="small fw-bold text-muted"><i class="bi bi-lightning-charge-fill text-warning me-1"></i> Quick Demo Test Autofill:</span>
+                                    </div>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <button type="button" class="btn btn-outline-dark btn-sm flex-grow-1 btn-fill-demo fw-bold" data-demo-role="admin">
+                                            <i class="bi bi-shield-lock-fill me-1"></i> Admin (admin / admin)
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm flex-grow-1 btn-fill-demo" data-demo-role="donor">
+                                            <i class="bi bi-person me-1"></i> Donor (donor / donor123)
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger btn-sm flex-grow-1 btn-fill-demo fw-bold" data-demo-role="mgm">
+                                            <i class="bi bi-hospital me-1"></i> MGM (mgm / hospital123)
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm flex-grow-1 btn-fill-demo" data-demo-role="hospital">
+                                            <i class="bi bi-hospital me-1"></i> TMH (tata_hospital)
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="text-center pt-2">
+                                    <span class="text-muted small">Don't have an account yet? </span>
+                                    <a href="signup.html" class="fw-bold text-danger text-decoration-none small">Register Here</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SIMPLE FOOTER -->
+    <div class="py-3 bg-white border-top text-center text-muted small">
+        <div class="container">
+            <a href="index.html" class="text-decoration-none text-muted me-3"><i class="bi bi-arrow-left me-1"></i> Return to Home</a>
+            <span>&bull;</span>
+            <span class="ms-3">&copy; 2026 LifeStream Blood Bank Network. Confidential &amp; Encrypted.</span>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5.3 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/chatbot.js"></script>
+</body>
+</html>

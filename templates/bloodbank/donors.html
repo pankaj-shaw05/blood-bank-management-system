@@ -1,0 +1,178 @@
+{% extends 'bloodbank/base.html' %}
+{% load static %}
+
+{% block title %}Find Verified Donors | LifeStream Blood Bank{% endblock %}
+
+{% block content %}
+<!-- INNER HEADER BANNER -->
+<section class="inner-page-header">
+    <div class="container position-relative" style="z-index: 2;">
+        <div class="breadcrumb-custom">
+            <a href="{% url 'home' %}"><i class="bi bi-house"></i> Home</a>
+            <i class="bi bi-chevron-right text-white-50"></i>
+            <span>Verified Donors</span>
+        </div>
+        <h1>Find Verified Blood Donors</h1>
+        <p>Directly contact available, pre-screened blood donors located across East Singhbhum district.</p>
+    </div>
+</section>
+
+<!-- DONOR SEARCH & FILTER CONTROLS (DIRECTLY QUERIES DJANGO DATABASE) -->
+<section class="py-4 bg-light border-bottom">
+    <div class="container">
+        <form method="GET" action="{% url 'donors' %}" class="card border-0 shadow-sm rounded-4 p-3 p-md-4">
+            <div class="row g-3 align-items-center">
+                <!-- Search text -->
+                <div class="col-lg-4 col-md-6">
+                    <label class="form-label small fw-bold text-muted"><i class="bi bi-search me-1"></i>Search Donor Name / Phone / Locality:</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light text-danger"><i class="bi bi-person"></i></span>
+                        <input type="text" name="q" class="form-control" placeholder="Search by name, street..." value="{{ search_q }}">
+                    </div>
+                </div>
+
+                <!-- Blood Group Filter -->
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label small fw-bold text-muted"><i class="bi bi-droplet-half me-1"></i>Blood Group:</label>
+                    <select name="blood_group" class="form-select">
+                        <option value="ALL">All Blood Groups</option>
+                        {% for bg in blood_groups %}
+                        <option value="{{ bg }}" {% if selected_group == bg %}selected{% endif %}>{{ bg }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Locality Filter -->
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label small fw-bold text-muted"><i class="bi bi-geo-alt me-1"></i>East Singhbhum Locality:</label>
+                    <select name="locality" class="form-select">
+                        <option value="ALL">All Localities</option>
+                        <option value="Bistupur" {% if selected_locality == 'Bistupur' %}selected{% endif %}>Bistupur</option>
+                        <option value="Sakchi" {% if selected_locality == 'Sakchi' %}selected{% endif %}>Sakchi</option>
+                        <option value="Telco" {% if selected_locality == 'Telco' %}selected{% endif %}>Telco</option>
+                        <option value="Golmuri" {% if selected_locality == 'Golmuri' %}selected{% endif %}>Golmuri</option>
+                        <option value="Baridih" {% if selected_locality == 'Baridih' %}selected{% endif %}>Baridih</option>
+                        <option value="Jugsalai" {% if selected_locality == 'Jugsalai' %}selected{% endif %}>Jugsalai</option>
+                        <option value="Mango" {% if selected_locality == 'Mango' %}selected{% endif %}>Mango</option>
+                    </select>
+                </div>
+
+                <!-- Availability & Submit -->
+                <div class="col-lg-2 col-md-6 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-primary-red w-100 py-2">
+                        <i class="bi bi-funnel-fill me-1"></i> Filter
+                    </button>
+                    {% if search_q or selected_group or selected_locality %}
+                    <a href="{% url 'donors' %}" class="btn btn-outline-secondary py-2" title="Clear Filters">
+                        <i class="bi bi-x-circle"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- DONORS GRID SECTION -->
+<section class="py-5 bg-white">
+    <div class="container">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold mb-1">
+                    Verified Donor Directory 
+                    <span class="badge bg-danger rounded-pill fs-6 ms-1">{{ available_count }} Available</span>
+                    <span class="badge bg-secondary-subtle text-dark rounded-pill fs-6">Total {{ total_count }}</span>
+                </h4>
+                <small class="text-muted">Showing pre-screened donors registered in the LifeStream East Singhbhum database.</small>
+            </div>
+
+            {% if not is_donor and not user.is_authenticated %}
+            <a href="{% url 'signup' %}?role=DONOR" class="btn btn-sm btn-outline-danger rounded-pill">
+                <i class="bi bi-plus-circle me-1"></i> Join as a Donor
+            </a>
+            {% endif %}
+        </div>
+
+        <div class="row g-4">
+            {% for donor in donors %}
+            <div class="col-md-6 col-lg-3">
+                <div class="custom-card p-3 h-100 d-flex flex-column justify-content-between border-top border-3 border-danger shadow-sm {% if user.is_authenticated and user_donor_profile and donor.id == user_donor_profile.id %}border-2 border-danger shadow{% endif %}">
+                    <div>
+                        <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
+                            <span class="badge bg-danger fs-5 px-3 py-1 rounded-pill">{{ donor.blood_group }}</span>
+                            <div class="d-flex align-items-center gap-1">
+                                {% if user.is_authenticated and user_donor_profile and donor.id == user_donor_profile.id %}
+                                    <span class="badge bg-danger text-white rounded-pill small">
+                                        <i class="bi bi-person-fill me-1"></i>You
+                                    </span>
+                                {% endif %}
+                                {% if donor.is_available %}
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill small">
+                                        <i class="bi bi-circle-fill small me-1"></i>Available
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary-subtle text-muted border border-secondary-subtle rounded-pill small">
+                                        <i class="bi bi-moon-fill small me-1"></i>Off-Duty
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <img src="{{ donor.avatar_url }}" alt="{{ donor.full_name }}" class="rounded-circle border border-2 border-danger-subtle" style="width: 52px; height: 52px; object-fit: cover;">
+                            <div>
+                                <h6 class="fw-bold mb-0 text-dark">{{ donor.full_name }}</h6>
+                                <span class="small text-muted"><i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ donor.city }}</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-light p-2 rounded small mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-muted">Age / Gender:</span>
+                                <strong>{{ donor.age }} yrs / {{ donor.gender }}</strong>
+                            </div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-muted">Total Donations:</span>
+                                <span class="text-danger fw-bold">{{ donor.total_donations }} times</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted">Last Donated:</span>
+                                <span>{{ donor.last_donation_date|date:"d M Y"|default:"First-time Ready" }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if user.is_authenticated and user_donor_profile and donor.id == user_donor_profile.id %}
+                    <div class="pt-2 border-top">
+                        <a href="{% url 'dashboard_donor' %}" class="btn btn-outline-danger btn-sm w-100 rounded-pill fw-bold">
+                            <i class="bi bi-speedometer2 me-1"></i> Your Profile &bull; Dashboard
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="pt-2 border-top d-flex gap-2">
+                        <a href="tel:{{ donor.phone }}" class="btn btn-outline-danger btn-sm flex-fill" title="Call Donor">
+                            <i class="bi bi-telephone-fill"></i> Call
+                        </a>
+                        <a href="{% url 'request_blood' %}?group={{ donor.blood_group }}" class="btn btn-primary-red btn-sm flex-fill">
+                            <i class="bi bi-send-fill"></i> Request
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="text-center py-5 bg-light rounded-4 border">
+                    <i class="bi bi-person-x text-muted fs-1 mb-2 d-block"></i>
+                    <h5 class="fw-bold text-dark">No Donors Found</h5>
+                    <p class="text-muted small mb-3">No verified donor matched your filter criteria in the database.</p>
+                    <a href="{% url 'donors' %}" class="btn btn-outline-danger btn-sm rounded-pill">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Filters
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

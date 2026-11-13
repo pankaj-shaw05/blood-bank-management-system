@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeStream | Professional Blood Bank Management System</title>
+
+    <script>
+        // Seamlessly open live Django server when opened directly from folder
+        if (window.location.protocol === 'file:') {
+            fetch('http://127.0.0.1:8000/api/hospitals/', { method: 'GET', mode: 'cors' })
+                .then(function(res) {
+                    if (res.ok) {
+                        window.location.replace('http://127.0.0.1:8000/');
+                    }
+                })
+                .catch(function() {});
+        }
+    </script>
+
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- MAIN NAVBAR (BOOTSTRAP LOGO & RESPONSIVE MENU) -->
+    <nav class="navbar navbar-expand-lg main-navbar">
+        <div class="container">
+            <!-- Brand Logo with Bootstrap Icon -->
+            <a class="navbar-brand-logo" href="index.html">
+                <div class="logo-icon-box">
+                    <i class="bi bi-droplet-half"></i>
+                </div>
+                <div>
+                    <div class="logo-text-title">Life<span>Stream</span></div>
+                    <span class="logo-tagline">Blood Bank Network</span>
+                </div>
+            </a>
+
+            <!-- Mobile Hamburger Toggle -->
+            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMainContent" aria-controls="navbarMainContent" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="bi bi-list fs-1 text-danger"></i>
+            </button>
+
+            <!-- Nav Links & Auth Actions -->
+            <div class="collapse navbar-collapse" id="navbarMainContent">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="index.html">
+                            <i class="bi bi-house-door"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="donors.html">
+                            <i class="bi bi-people"></i> Find Donors
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="request-blood.html">
+                            <i class="bi bi-heart-pulse"></i> Request Blood
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="inventory.html">
+                            <i class="bi bi-pie-chart"></i> Live Inventory
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="camps.html">
+                            <i class="bi bi-calendar-check"></i> Donation Camps
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Dynamic Auth Buttons (Managed by main.js) -->
+                <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0" id="navAuthActions">
+                    <a href="login.html" class="btn btn-white">
+                        <i class="bi bi-box-arrow-in-right"></i> Login
+                    </a>
+                    <a href="signup.html" class="btn btn-primary-red">
+                        <i class="bi bi-person-plus-fill"></i> Register
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION - 100VH WITH CINEMATIC BACKGROUND VIDEO & CENTERED CONTENT -->
+    <section class="hero-section">
+        <!-- 10-Second Looping Medical Background Video -->
+        <div class="hero-video-wrapper">
+            <video id="heroBackgroundVideo" class="hero-background-video" autoplay muted loop playsinline poster="https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&w=1920&q=80">
+                <source src="assets/hero-bg.mp4" type="video/mp4">
+                <source src="https://assets.mixkit.co/videos/46368/46368-720.mp4" type="video/mp4">
+            </video>
+            <div class="hero-video-overlay"></div>
+            <div class="hero-overlay-pattern"></div>
+        </div>
+
+        <!-- Centered Hero Content -->
+        <div class="container position-relative" style="z-index: 10;">
+            <div class="hero-content-centered">
+                <!-- Live Telemetry Capsule -->
+                <div class="hero-live-pill mb-3">
+                    <span class="live-beacon-dot"></span>
+                    <span>EAST SINGHBHUM GEOFENCE ACTIVE &bull; 8 VERIFIED FACILITIES</span>
+                </div>
+
+                <!-- Clean, Balanced Centered Headline -->
+                <h1 class="hero-title-centered mb-3">
+                    Every Drop Counts.<br>
+                    <span class="hero-gradient-text">Give Blood, Save Lives.</span>
+                </h1>
+
+                <!-- Subtitle -->
+                <p class="hero-subtitle-centered">
+                    Connecting voluntary blood donors with hospital trauma units and critical patients in real time. Transparent, verified, and 100% free.
+                </p>
+
+                <!-- Centered Feature Badges -->
+                <div class="hero-feature-tags-centered">
+                    <div class="hero-tag-item">
+                        <i class="bi bi-shield-check"></i>
+                        <span>100% Tested &amp; Safe</span>
+                    </div>
+                    <div class="hero-tag-item">
+                        <i class="bi bi-lightning-charge-fill"></i>
+                        <span>Instant Donor SMS Alert</span>
+                    </div>
+                    <div class="hero-tag-item">
+                        <i class="bi bi-heart-fill"></i>
+                        <span>Zero Commercial Cost</span>
+                    </div>
+                    <div class="hero-tag-item">
+                        <i class="bi bi-broadcast"></i>
+                        <span>24/7 National Dispatch</span>
+                    </div>
+                </div>
+
+                <!-- Centered Action Buttons -->
+                <div class="d-flex flex-wrap justify-content-center gap-2 gap-sm-3 mb-4">
+                    <a href="donors.html" class="btn btn-primary-red hero-action-btn shadow-sm">
+                        <i class="bi bi-search-heart"></i> Find Donors Near You
+                    </a>
+                    <a href="request-blood.html" class="btn btn-glass-white hero-action-btn shadow-sm">
+                        <i class="bi bi-broadcast-pin text-danger"></i> Urgent Blood Request
+                    </a>
+                    <a href="camps.html" class="btn btn-outline-light hero-action-btn shadow-sm">
+                        <i class="bi bi-calendar2-check"></i> Explore Camps
+                    </a>
+                </div>
+
+                <!-- Centered Trust Strip / Social Proof -->
+                <div class="hero-trust-strip-centered">
+                    <div class="avatar-stack">
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80" alt="Donor avatar">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80" alt="Donor avatar">
+                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80" alt="Donor avatar">
+                        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80" alt="Donor avatar">
+                    </div>
+                    <div>
+                        <div class="trust-stars mb-1">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <span class="ms-1 fw-bold text-white">4.9 / 5</span>
+                        </div>
+                        <span class="trust-rating-text text-white-50 small d-block">Trusted by <strong>14,800+</strong> voluntary donors &amp; hospital blood coordinators</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scroll Down Animated Indicator -->
+        <a href="#statsSection" class="hero-scroll-down-btn" aria-label="Scroll down to statistics">
+            <span>Explore</span>
+            <i class="bi bi-chevron-double-down"></i>
+        </a>
+    </section>
+
+    <!-- STATS COUNTER BANNER -->
+    <div class="container stats-counter-section" id="statsSection">
+        <div class="stats-card-main">
+            <div class="row g-4 text-center">
+                <div class="col-6 col-md-3 stat-item">
+                    <div class="stat-number text-gradient counter-value" data-target="775">775</div>
+                    <div class="stat-label">Units in Central Stock</div>
+                </div>
+                <div class="col-6 col-md-3 stat-item">
+                    <div class="stat-number text-dark counter-value" data-target="14">14</div>
+                    <div class="stat-label">Verified Donors</div>
+                </div>
+                <div class="col-6 col-md-3 stat-item">
+                    <div class="stat-number text-danger counter-value" data-target="8">8</div>
+                    <div class="stat-label">Geofenced Hospitals</div>
+                </div>
+                <div class="col-6 col-md-3 stat-item">
+                    <div class="stat-number text-success">&lt; 15 Mins</div>
+                    <div class="stat-label">Average Dispatch</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BLOOD GROUP SELECTOR GRID -->
+    <section class="py-5">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag"><i class="bi bi-droplet-half"></i> Blood Compatibility</span>
+                <h2 class="section-title">Quick Search by Blood Group</h2>
+                <p class="section-subtitle">Click on any group to instantly view ready donors and stock availability in our national blood repository.</p>
+            </div>
+
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+                <a href="donors.html" class="blood-circle-btn">A+</a>
+                <a href="donors.html" class="blood-circle-btn">A-</a>
+                <a href="donors.html" class="blood-circle-btn">B+</a>
+                <a href="donors.html" class="blood-circle-btn">B-</a>
+                <a href="donors.html" class="blood-circle-btn">AB+</a>
+                <a href="donors.html" class="blood-circle-btn">AB-</a>
+                <a href="donors.html" class="blood-circle-btn">O+</a>
+                <a href="donors.html" class="blood-circle-btn active">O-</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- LIVE EMERGENCY REQUESTS HIGHLIGHT -->
+    <section class="py-5 bg-white border-top border-bottom">
+        <div class="container">
+            <div class="d-flex flex-wrap align-items-end justify-content-between mb-4 gap-3">
+                <div>
+                    <span class="section-tag bg-danger text-white"><i class="bi bi-exclamation-circle-fill"></i> Critical Priority</span>
+                    <h2 class="section-title mb-0">Emergency Blood Requests</h2>
+                    <p class="text-muted mb-0">Patients needing immediate transfusions in verified hospital trauma wards.</p>
+                </div>
+                <a href="request-blood.html" class="btn btn-outline-red">
+                    <i class="bi bi-plus-circle"></i> Create New Request
+                </a>
+            </div>
+
+            <div class="row g-4" id="homeEmergencyCards">
+                <div class="col-12 text-center py-4 bg-light rounded-4">
+                    <i class="bi bi-check-circle-fill text-success fs-1 mb-2 d-block"></i>
+                    <h5 class="fw-bold">No Critical Shortages Reported</h5>
+                    <p class="text-muted small mb-0">All recent hospital requisitions have been matched with active donors in the database.</p>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="request-blood.html" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-right-circle"></i> View All Live Requisitions
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- WHY DONATE BLOOD (FEATURES) -->
+    <section class="py-5">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag"><i class="bi bi-stars"></i> Make An Impact</span>
+                <h2 class="section-title">Why Voluntary Blood Donation Matters</h2>
+                <p class="section-subtitle">A single donation of whole blood takes only 10 to 15 minutes and can save up to three individual lives.</p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-3">
+                    <div class="custom-card p-4 h-100">
+                        <div class="icon-box-lg">
+                            <i class="bi bi-heart-pulse-fill"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">Save 3 Lives</h5>
+                        <p class="text-muted small mb-0">Your whole blood donation is separated into Red Blood Cells, Platelets, and Plasma, treating trauma, dengue, and surgery patients.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-3">
+                    <div class="custom-card p-4 h-100">
+                        <div class="icon-box-lg">
+                            <i class="bi bi-activity"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">Free Health Screening</h5>
+                        <p class="text-muted small mb-0">Every donor undergoes complimentary checks for blood pressure, pulse, hemoglobin, and infectious markers before donating.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-3">
+                    <div class="custom-card p-4 h-100">
+                        <div class="icon-box-lg">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">Replenish Blood Cells</h5>
+                        <p class="text-muted small mb-0">Donation stimulates bone marrow to produce fresh, new blood cells within weeks, promoting cardiovascular wellness.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-3">
+                    <div class="custom-card p-4 h-100">
+                        <div class="icon-box-lg">
+                            <i class="bi bi-trophy-fill"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">Donor Recognition</h5>
+                        <p class="text-muted small mb-0">Receive digital donor cards, certified appreciation badges, and priority assistance should you or your family ever need blood.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS (INTERACTIVE STEP-BY-STEP WORKFLOW) -->
+    <section class="py-5 steps-workflow-section border-top border-bottom">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag"><i class="bi bi-bezier2"></i> Streamlined 4-Step Journey</span>
+                <h2 class="section-title">How Blood Donation Works</h2>
+                <p class="section-subtitle">Comfortable, hygienic, and scientifically managed from arrival to departure in under 35 minutes.</p>
+            </div>
+
+            <!-- Horizontal Stepper Milestones Track (Desktop) -->
+            <div class="steps-progress-track d-none d-lg-block">
+                <div class="steps-track-rail"></div>
+                <div class="d-flex justify-content-between align-items-center position-relative">
+                    <div class="step-milestone-node">
+                        <div class="milestone-badge-circle">01</div>
+                        <span class="milestone-node-title">1. Sign In</span>
+                    </div>
+                    <div class="step-milestone-node">
+                        <div class="milestone-badge-circle">02</div>
+                        <span class="milestone-node-title">2. Health Vitals</span>
+                    </div>
+                    <div class="step-milestone-node">
+                        <div class="milestone-badge-circle">03</div>
+                        <span class="milestone-node-title">3. Blood Draw</span>
+                    </div>
+                    <div class="step-milestone-node">
+                        <div class="milestone-badge-circle">04</div>
+                        <span class="milestone-node-title">4. Certificate</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interconnected Step Cards -->
+            <div class="row g-4 position-relative">
+                <!-- STEP 1 -->
+                <div class="col-md-6 col-lg-3 process-step-col">
+                    <div class="step-flow-card">
+                        <div>
+                            <div class="step-header-meta">
+                                <span class="step-number-tag"><i class="bi bi-arrow-right-short"></i> Step 01</span>
+                                <span class="step-time-tag"><i class="bi bi-clock-history"></i> ~5 Mins</span>
+                            </div>
+
+                            <div class="step-icon-wrapper">
+                                <i class="bi bi-person-vcard-fill"></i>
+                            </div>
+
+                            <h5 class="step-card-title">Digital Registration</h5>
+                            <p class="step-card-desc">Quick, paperless sign-in online or on-site tablet. Basic donor identity &amp; consent verified in seconds.</p>
+
+                            <ul class="step-checkpoints">
+                                <li><i class="bi bi-check-circle-fill"></i> <span>100% digital, zero paperwork</span></li>
+                                <li><i class="bi bi-check-circle-fill"></i> <span>Verified donor profile code</span></li>
+                                <li><i class="bi bi-check-circle-fill"></i> <span>Confidential medical consent</span></li>
+                            </ul>
+                        </div>
+
+                        <div class="step-card-footer">
+                            <span class="badge bg-light text-muted border"><i class="bi bi-shield-check text-success me-1"></i>Pre-Screening</span>
+                            <span class="small text-danger fw-bold">Step 1 of 4</span>
+                        </div>
+                    </div>
+                    <!-- Connector Arrow to Next Step -->
+                    <div class="step-flow-arrow d-none d-lg-flex">
+                        <i class="bi bi-chevron-right"></i>
+                    </div>
+                </div>
+
+                <!-- STEP 2 -->
+                <div class="col-md-6 col-lg-3 process-step-col">
+                    <div class="step-flow-card">
+                        <div>
+                            <div class="step-header-meta">
+                                <span class="step-number-tag"><i class="bi bi-arrow-right-short"></i> Step 02</span>
+                                <span class="step-time-tag"><i class="bi bi-clock-history"></i> ~8 Mins</span>
+                            </div>
+
+                            <div class="step-icon-wrapper">
+                                <i class="bi bi-clipboard2-pulse-fill"></i>
+                            </div>
+
+                            <h5 class="step-card-title">Health Vitals Check</h5>
+                            <p class="step-card-desc">A qualified phlebotomist checks vital signs to ensure you are 100% medically fit to donate.</p>
+
+                            <ul class="step-checkpoints">
+                                <li><i class="bi bi-check-circle-fill"></i> <span>Hemoglobin &amp; BP measurement</span></li>
+                                <li><i class="bi bi-check-circle-fill"></i> <span>Pulse &amp; body temperature check</span></li>
+                                <li><i class="bi bi-check-circle-fill"></i> <span>Private doctor consultation</span></li>
+                            </ul>
+                        </div>
+
+                        <div class="step-card-footer">
+                            <span class="badge bg-light text-muted border"><i class="bi bi-heart-pulse text-danger me-1"></i>Clinical Check</span>
+                            <span class="small text-danger fw-bold">Step 2 of 4</span>
+                        </div>
+                    </div>
+                    <!-- Connector Arrow to Next Step -->
+                    <div class="step-flow-arrow d-none d-lg-flex">
+                        <i class="bi bi-chevron-right"></i>
+                    </div>
+                </div>
+
+                <!-- STEP 3 -->
+                <div class="col-md-6 col-lg-3 process-step-col">
+                    <div class="step-flow-card">
+                        <div>
+                            <div class="step-header-meta">
+                                <span class="step-number-tag bg-danger"><i class="bi bi-droplet-fill"></i> Step 03</span>
+                                <span class="step-time-tag"><i class="bi bi-clock-history"></i> ~10 Mins</span>
+                            </div>
+
+                            <div class="step-icon-wrapper">
+                                <i class="bi bi-droplet-half"></i>
+                            </div>
+
+                            <h5 class="step-card-title">The Blood Donation</h5>
+                            <p class="step-card-desc">Relax on an ergonomic recliner chair while our certified technician collects 350-450ml of whole blood.</p>
+
+                            <ul class="step-checkpoints">
+                                <li><i class="bi bi-check-circle-fill"></i> <span>100% sterile single-use kits</span></li>
+                                <li><i class="bi bi-check-circle-fill"></i> <span>Painless aseptic technique</span></li>
+                                <li><i class="bi bi-check-circle-fill"></i> <span>Draw completes in 8-10 minutes</span></li>
+                            </ul>
+                        </div>
+
+                        <div class="step-card-footer">
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle"><i class="bi bi-droplet-fill text-danger me-1"></i>Core Draw</span>
+                            <span class="small text-danger fw-bold">Step 3 of 4</span>
+                        </div>
+                    </div>
+                    <!-- Connector Arrow to Next Step -->
+                    <div class="step-flow-arrow d-none d-lg-flex">
+                        <i class="bi bi-chevron-right"></i>
+                    </div>
+                </div>
+
+                <!-- STEP 4 -->
+                <div class="col-md-6 col-lg-3 process-step-col">
+                    <div class="step-flow-card">
+                        <div>
+                            <div class="step-header-meta">
+                                <span class="step-number-tag"><i class="bi bi-award-fill"></i> Step 04</span>
+                                <span class="step-time-tag"><i class="bi bi-clock-history"></i> ~15 Mins</span>
+                            </div>
+
+                            <div class="step-icon-wrapper">
+                                <i class="bi bi-cup-hot-fill"></i>
+                            </div>
+
+                            <h5 class="step-card-title">Rest &amp; Certificate</h5>
+                            <p class="step-card-desc">Enjoy nutritious refreshments in our lounge and collect your government-recognized donor certificate.</p>
+
+                            <ul class="step-checkpoints">
+                                <li><i class="bi bi-check-circle-fill"></i> <span>Juices, fresh fruit &amp; cookies</span></li>
+                                <li><i class="bi bi-check-circle-fill"></i> <span>15 mins rest in recovery lounge</span></li>
+                                <li><i class="bi bi-check-circle-fill"></i> <span>Instant Digital Hero Certificate</span></li>
+                            </ul>
+                        </div>
+
+                        <div class="step-card-footer">
+                            <span class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-patch-check-fill text-success me-1"></i>Completed</span>
+                            <span class="small text-success fw-bold">Life Saved!</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- UPCOMING CAMPS CALLOUT -->
+    <section class="py-5">
+        <div class="container">
+            <div class="cta-banner">
+                <div class="row align-items-center g-4">
+                    <div class="col-lg-8">
+                        <span class="badge bg-danger mb-2 px-3 py-1 fs-7"><i class="bi bi-calendar-event me-1"></i> Community Drives</span>
+                        <h2 class="text-white fw-bold display-6 mb-3">Organize or Join a Blood Camp in Your Neighborhood</h2>
+                        <p class="text-light mb-4 fs-6">Corporate parks, universities, and residential societies are organizing safe blood drives this weekend. Register early for a dedicated slot or volunteer.</p>
+                        <div class="d-flex flex-wrap gap-3">
+                            <a href="camps.html" class="btn btn-primary-red btn-lg">
+                                <i class="bi bi-calendar2-check"></i> Explore Upcoming Camps
+                            </a>
+                            <a href="signup.html" class="btn btn-white btn-lg">
+                                <i class="bi bi-person-heart"></i> Become a Volunteer
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 text-center d-none d-lg-block">
+                        <div class="bg-white p-4 rounded-4 text-dark shadow-lg">
+                            <i class="bi bi-award text-danger display-4 mb-2 d-block"></i>
+                            <h4 class="fw-bold mb-1">Host a Drive</h4>
+                            <p class="text-muted small mb-3">We supply mobile collection vans, doctors, and logistics at zero cost.</p>
+                            <a href="tel:18007335433" class="btn btn-outline-red w-100 btn-sm">
+                                <i class="bi bi-telephone"></i> Call Camp Coordinator
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER SECTION -->
+    <footer class="footer-section">
+        <div class="container">
+            <div class="row g-4 mb-5">
+                <!-- Col 1: Brand & Bio -->
+                <div class="col-lg-4">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div class="logo-icon-box">
+                            <i class="bi bi-droplet-half"></i>
+                        </div>
+                        <div>
+                            <div class="logo-text-title text-white">Life<span class="text-danger">Stream</span></div>
+                            <span class="logo-tagline text-white-50">Blood Bank Network</span>
+                        </div>
+                    </div>
+                    <p class="small text-slate-muted mb-4">
+                        LifeStream is a secure, national digital infrastructure connecting voluntary blood donors with verified hospitals, trauma centers, and blood banks to eradicate emergency shortages.
+                    </p>
+                    <div class="d-flex">
+                        <a href="#" class="footer-social-icon" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="footer-social-icon" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
+                        <a href="#" class="footer-social-icon" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="footer-social-icon" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
+                    </div>
+                </div>
+
+                <!-- Col 2: Navigation Links -->
+                <div class="col-sm-6 col-lg-2">
+                    <h5>Quick Links</h5>
+                    <ul class="footer-links">
+                        <li><a href="index.html"><i class="bi bi-chevron-right text-danger"></i> Home</a></li>
+                        <li><a href="donors.html"><i class="bi bi-chevron-right text-danger"></i> Find Donors</a></li>
+                        <li><a href="request-blood.html"><i class="bi bi-chevron-right text-danger"></i> Request Blood</a></li>
+                        <li><a href="inventory.html"><i class="bi bi-chevron-right text-danger"></i> Live Inventory</a></li>
+                        <li><a href="camps.html"><i class="bi bi-chevron-right text-danger"></i> Blood Camps</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 3: Portal Access -->
+                <div class="col-sm-6 col-lg-2">
+                    <h5>User Portals</h5>
+                    <ul class="footer-links">
+                        <li><a href="login.html"><i class="bi bi-chevron-right text-danger"></i> Donor Login</a></li>
+                        <li><a href="signup.html"><i class="bi bi-chevron-right text-danger"></i> Register as Donor</a></li>
+                        <li><a href="login.html"><i class="bi bi-chevron-right text-danger"></i> Hospital Portal</a></li>
+                        <li><a href="login.html"><i class="bi bi-chevron-right text-danger"></i> Admin Console</a></li>
+                        <li><a href="inventory.html"><i class="bi bi-chevron-right text-danger"></i> Compatibility Matrix</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 4: 24/7 Helpline & Contact -->
+                <div class="col-lg-4">
+                    <h5>Emergency Helpline</h5>
+                    <p class="small text-slate-muted mb-3">For immediate blood transfusion dispatches and hospital allocations:</p>
+                    <div class="p-3 rounded-3 bg-slate-800 border border-slate-700 mb-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <i class="bi bi-telephone-inbound-fill text-danger fs-3"></i>
+                            <div>
+                                <span class="d-block small text-white-50">Toll-Free National Helpline</span>
+                                <a href="tel:18007335433" class="fs-5 fw-bold text-white text-decoration-none">1800-RED-LIFE (733-5433)</a>
+                            </div>
+                        </div>
+                    </div>
+                    <small class="text-white-50"><i class="bi bi-envelope me-1"></i> support@lifestream-bloodbank.org</small>
+                </div>
+            </div>
+
+            <div class="pt-4 border-top border-secondary border-opacity-25 text-center text-md-between d-md-flex align-items-center justify-content-between small">
+                <p class="mb-2 mb-md-0 text-slate-muted">&copy; 2026 LifeStream Blood Bank Management System. All Rights Reserved.</p>
+                <div class="d-flex justify-content-center gap-3 text-slate-muted">
+                    <a href="#" class="text-decoration-none text-slate-muted">Privacy Policy</a>
+                    <span>&bull;</span>
+                    <a href="#" class="text-decoration-none text-slate-muted">Terms of Service</a>
+                    <span>&bull;</span>
+                    <a href="#" class="text-decoration-none text-slate-muted">Medical Ethics</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating Emergency Call Button -->
+    <a href="tel:18007335433" class="floating-call-btn" title="Emergency Blood Helpline" aria-label="Emergency Blood Helpline">
+        <i class="bi bi-telephone-fill"></i>
+        <span class="floating-call-tooltip">24/7 Helpline: 1800-RED-LIFE</span>
+    </a>
+
+    <!-- Back to top button -->
+    <button class="back-to-top" id="backToTopBtn" aria-label="Back to Top">
+        <i class="bi bi-chevron-up"></i>
+    </button>
+
+    <!-- Bootstrap 5.3 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Core App Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/chatbot.js"></script>
+    <!-- Live Database Fetch Sync for Home -->
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const video = document.getElementById("heroBackgroundVideo");
+        if (video) {
+            video.muted = true;
+            video.defaultMuted = true;
+            const playPromise = video.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(function() {
+                    const onGesture = function() {
+                        video.muted = true;
+                        video.play();
+                        window.removeEventListener("click", onGesture);
+                        window.removeEventListener("scroll", onGesture);
+                    };
+                    window.addEventListener("click", onGesture, { passive: true, once: true });
+                    window.addEventListener("scroll", onGesture, { passive: true, once: true });
+                });
+            }
+        }
+
+        // Fetch live database requests from API
+        fetch('/api/requests/')
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.success && data.requests && data.requests.length > 0) {
+                    const container = document.getElementById("homeEmergencyCards");
+                    if (container) {
+                        container.innerHTML = data.requests.slice(0, 3).map(req => `
+                            <div class="col-md-6 col-lg-4">
+                                <div class="custom-card p-4 border-start border-4 border-danger h-100 d-flex flex-column justify-content-between">
+                                    <div>
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <div class="blood-drop-tag fs-5">${req.blood_group}</div>
+                                            <span class="badge bg-danger badge-pulse">${req.urgency}</span>
+                                        </div>
+                                        <h5 class="fw-bold mb-1">${req.patient_name}</h5>
+                                        <p class="text-muted small mb-2"><i class="bi bi-hospital text-danger me-1"></i>${req.hospital_name || req.hospital}</p>
+                                        <p class="small text-secondary mb-3">${req.diagnosis || 'Emergency transfusion required.'}</p>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                                        <span class="badge bg-danger-subtle text-danger">${req.units_needed} Unit(s)</span>
+                                        <a href="request-blood.html" class="btn btn-primary-red btn-sm">Donate Now</a>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+                }
+            })
+            .catch(() => {});
+    });
+    </script>
+</body>
+</html>

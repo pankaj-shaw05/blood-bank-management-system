@@ -1,0 +1,345 @@
+{% extends 'bloodbank/base.html' %}
+{% load static %}
+
+{% block title %}Live Blood Inventory & Stock Telemetry | LifeStream{% endblock %}
+
+{% block content %}
+<!-- INNER HEADER BANNER -->
+<section class="inner-page-header">
+    <div class="container position-relative" style="z-index: 2;">
+        <div class="breadcrumb-custom">
+            <a href="{% url 'home' %}"><i class="bi bi-house"></i> Home</a>
+            <i class="bi bi-chevron-right text-white-50"></i>
+            <span>Live Stock Telemetry</span>
+        </div>
+        <h1>Central Blood Inventory &amp; Reserve Status</h1>
+        <p>Real-time telemetry of blood component reserves across accredited East Singhbhum blood bank storage units.</p>
+    </div>
+</section>
+
+<!-- INVENTORY KPI CARDS -->
+<section class="py-4 bg-light border-bottom">
+    <div class="container">
+        <div class="row g-3">
+            <div class="col-6 col-lg-3">
+                <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                    <span class="text-muted small fw-bold text-uppercase d-block mb-1">Total Available Units</span>
+                    <h2 class="fw-bold text-danger mb-0">{{ total_units }}</h2>
+                    <small class="text-success fw-bold"><i class="bi bi-check-circle me-1"></i>Across 8 Groups</small>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                    <span class="text-muted small fw-bold text-uppercase d-block mb-1">Packed Red Cells</span>
+                    <h2 class="fw-bold text-dark mb-0">{{ total_red_cells }}</h2>
+                    <small class="text-muted">PRBC Units</small>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                    <span class="text-muted small fw-bold text-uppercase d-block mb-1">Platelet Concentrates</span>
+                    <h2 class="fw-bold text-primary mb-0">{{ total_platelets }}</h2>
+                    <small class="text-muted">Single/Random Donor</small>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                    <span class="text-muted small fw-bold text-uppercase d-block mb-1">Fresh Frozen Plasma</span>
+                    <h2 class="fw-bold text-warning mb-0">{{ total_plasma }}</h2>
+                    <small class="text-muted">FFP Units</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- LIVE 8 BLOOD GROUPS CARDS GRID -->
+<section class="py-5 bg-white">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold mb-1">Reserve Status by Blood Group</h4>
+                <small class="text-muted">Updated in real-time by regional hospital transfusions &amp; community donation drives.</small>
+            </div>
+            {% if is_admin_role or user.is_superuser %}
+            <a href="/admin/bloodbank/bloodinventory/" target="_blank" class="btn btn-outline-dark btn-sm rounded-pill">
+                <i class="bi bi-pencil-square me-1"></i> Update Stock in Admin
+            </a>
+            {% endif %}
+        </div>
+
+        <div class="row g-4">
+            {% for item in items %}
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm rounded-4 p-3 border-top border-4 {% if item.units <= item.critical %}border-danger{% else %}border-success{% endif %}">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-danger fs-4 px-3 py-1 rounded-pill">{{ item.blood_group }}</span>
+                        {% if item.units <= item.critical %}
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i>Critical Low
+                            </span>
+                        {% elif item.units < item.optimal %}
+                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill">
+                                <i class="bi bi-dash-circle-fill me-1"></i>Moderate
+                            </span>
+                        {% else %}
+                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">
+                                <i class="bi bi-check-circle-fill me-1"></i>Optimal
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="my-3 text-center">
+                        <h1 class="fw-bold text-dark mb-0 display-5">{{ item.units }}</h1>
+                        <span class="text-muted small">Units in Reserve</span>
+                    </div>
+
+                    <!-- Capacity Progress Bar -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between small text-muted mb-1">
+                            <span>Capacity: {{ item.percentage_capacity }}%</span>
+                            <span>Target: {{ item.optimal }}</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar {% if item.units <= item.critical %}bg-danger{% elif item.units < item.optimal %}bg-warning{% else %}bg-success{% endif %}" role="progressbar" style="width: {{ item.percentage_capacity }}%;" aria-valuenow="{{ item.percentage_capacity }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-light p-2 rounded small mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Red Blood Cells:</span>
+                            <strong>{{ item.red_cells }} units</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Platelets:</span>
+                            <strong>{{ item.platelets }} units</strong>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Plasma (FFP):</span>
+                            <strong>{{ item.plasma }} units</strong>
+                        </div>
+                    </div>
+
+                    <a href="{% url 'request_blood' %}?group={{ item.blood_group }}" class="btn btn-outline-danger btn-sm w-100 mt-auto">
+                        <i class="bi bi-send me-1"></i> Requisition {{ item.blood_group }}
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- INTERACTIVE BLOOD COMPATIBILITY & CROSSMATCH CALCULATOR -->
+<section class="py-5 bg-light border-top border-bottom" id="compatibilityMatrixSection">
+    <div class="container">
+        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+            <div class="row g-4 align-items-center">
+                <div class="col-lg-5">
+                    <div class="d-inline-flex align-items-center gap-2 mb-2">
+                        <span class="badge bg-danger rounded-pill px-3 py-1 fw-bold text-uppercase">
+                            <i class="bi bi-shield-check me-1"></i> Clinical Transfusion Protocol
+                        </span>
+                        <span class="badge bg-dark rounded-pill px-3 py-1">NBTC ABO &amp; Rh Guidelines</span>
+                    </div>
+                    <h3 class="fw-bold text-dark mb-2">Interactive Compatibility Matcher</h3>
+                    <p class="text-muted small mb-4">
+                        Select a patient or donor blood group below to instantly calculate safe compatible transfusion groups and check <strong>real-time available units</strong> in East Singhbhum blood reserves.
+                    </p>
+
+                    <!-- Blood Group Buttons Selector -->
+                    <label class="form-label small fw-bold text-dark text-uppercase">Select Blood Group to Match:</label>
+                    <div class="d-flex flex-wrap gap-2 mb-4" id="compatGroupPills">
+                        <button type="button" class="btn btn-danger rounded-pill px-3 py-2 fw-bold compat-pill active" data-group="O+">O+</button>
+                        <button type="button" class="btn btn-outline-danger rounded-pill px-3 py-2 fw-bold compat-pill" data-group="O-">O-</button>
+                        <button type="button" class="btn btn-outline-danger rounded-pill px-3 py-2 fw-bold compat-pill" data-group="A+">A+</button>
+                        <button type="button" class="btn btn-outline-danger rounded-pill px-3 py-2 fw-bold compat-pill" data-group="A-">A-</button>
+                        <button type="button" class="btn btn-outline-danger rounded-pill px-3 py-2 fw-bold compat-pill" data-group="B+">B+</button>
+                        <button type="button" class="btn btn-outline-danger rounded-pill px-3 py-2 fw-bold compat-pill" data-group="B-">B-</button>
+                        <button type="button" class="btn btn-outline-danger rounded-pill px-3 py-2 fw-bold compat-pill" data-group="AB+">AB+</button>
+                        <button type="button" class="btn btn-outline-danger rounded-pill px-3 py-2 fw-bold compat-pill" data-group="AB-">AB-</button>
+                    </div>
+
+                    <!-- Quick Clinical Facts Banner -->
+                    <div class="p-3 bg-light rounded-3 border-start border-4 border-danger small">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <i class="bi bi-info-circle-fill text-danger"></i>
+                            <strong class="text-dark">Universal Principles:</strong>
+                        </div>
+                        <ul class="mb-0 ps-3 text-secondary" style="font-size: 0.8rem;">
+                            <li><strong>O- Negative:</strong> Universal Red Blood Cell Donor (can give RBC to all 8 groups).</li>
+                            <li><strong>AB+ Positive:</strong> Universal Plasma / Whole Blood Recipient.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Live Results Panel -->
+                <div class="col-lg-7">
+                    <div class="p-4 rounded-4" style="background: #f8fafc; border: 1.5px solid #e2e8f0;">
+                        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                            <div>
+                                <span class="text-muted small text-uppercase fw-bold">Active Selection:</span>
+                                <h4 class="fw-bolder text-danger mb-0" id="selectedGroupTitle">Blood Group O+</h4>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-success rounded-pill px-3 py-2 fw-bold fs-6" id="totalCompatibleUnitsBadge">246 Units Compatible</span>
+                            </div>
+                        </div>
+
+                        <!-- Can Receive From (Safe Donors) -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                <i class="bi bi-arrow-down-left-circle-fill text-success"></i> Patient Can Safely RECEIVE Red Cells From:
+                            </h6>
+                            <div class="d-flex flex-wrap gap-2" id="receiveFromContainer">
+                                <!-- Populated dynamically by JS -->
+                            </div>
+                        </div>
+
+                        <!-- Can Give To (Safe Recipients) -->
+                        <div class="mb-3">
+                            <h6 class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+                                <i class="bi bi-arrow-up-right-circle-fill text-primary"></i> Donor Can Safely GIVE Red Cells To:
+                            </h6>
+                            <div class="d-flex flex-wrap gap-2" id="giveToContainer">
+                                <!-- Populated dynamically by JS -->
+                            </div>
+                        </div>
+
+                        <!-- Action Link -->
+                        <div class="pt-3 border-top d-flex justify-content-between align-items-center">
+                            <span class="text-muted small">Need this blood group urgently?</span>
+                            <a href="{% url 'request_blood' %}?group=O+" id="compatRequisitionBtn" class="btn btn-primary-red btn-sm rounded-pill px-3 fw-bold">
+                                <i class="bi bi-send-fill me-1"></i> Requisition O+ Blood
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- INVENTORY AUDIT TABLE -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+            <h5 class="fw-bold mb-3"><i class="bi bi-table me-2 text-danger"></i>Full Component Telemetry Matrix</h5>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Blood Group</th>
+                            <th>Total Units</th>
+                            <th>Red Blood Cells</th>
+                            <th>Platelets</th>
+                            <th>Plasma</th>
+                            <th>Reserve Threshold</th>
+                            <th>Status</th>
+                            <th>Last Database Update</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr>
+                            <td><span class="badge bg-danger rounded-pill px-3 py-1 fs-6">{{ item.blood_group }}</span></td>
+                            <td><strong class="fs-6">{{ item.units }}</strong></td>
+                            <td>{{ item.red_cells }}</td>
+                            <td>{{ item.platelets }}</td>
+                            <td>{{ item.plasma }}</td>
+                            <td class="small text-muted">Optimal: {{ item.optimal }} &bull; Min: {{ item.critical }}</td>
+                            <td>
+                                {% if item.units <= item.critical %}
+                                    <span class="badge bg-danger text-white">Critical Alert</span>
+                                {% elif item.units < item.optimal %}
+                                    <span class="badge bg-warning text-dark">Replenish Recommended</span>
+                                {% else %}
+                                    <span class="badge bg-success text-white">Adequate Reserve</span>
+                                {% endif %}
+                            </td>
+                            <td class="small text-muted">{{ item.last_updated|date:"d M Y, H:i" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const stockMap = {
+        {% for item in items %}
+        "{{ item.blood_group }}": {{ item.units }},
+        {% endfor %}
+    };
+
+    const compatRules = {
+        'O-': { receive: ['O-'], give: ['O-', 'O+', 'A-', 'A+', 'B-', 'B+', 'AB-', 'AB+'] },
+        'O+': { receive: ['O+', 'O-'], give: ['O+', 'A+', 'B+', 'AB+'] },
+        'A-': { receive: ['A-', 'O-'], give: ['A-', 'A+', 'AB-', 'AB+'] },
+        'A+': { receive: ['A+', 'A-', 'O+', 'O-'], give: ['A+', 'AB+'] },
+        'B-': { receive: ['B-', 'O-'], give: ['B-', 'B+', 'AB-', 'AB+'] },
+        'B+': { receive: ['B+', 'B-', 'O+', 'O-'], give: ['B+', 'AB+'] },
+        'AB-': { receive: ['AB-', 'A-', 'B-', 'O-'], give: ['AB-', 'AB+'] },
+        'AB+': { receive: ['AB+', 'AB-', 'A+', 'A-', 'B+', 'B-', 'O+', 'O-'], give: ['AB+'] }
+    };
+
+    function updateCompatibility(group) {
+        const title = document.getElementById('selectedGroupTitle');
+        const badge = document.getElementById('totalCompatibleUnitsBadge');
+        const receiveBox = document.getElementById('receiveFromContainer');
+        const giveBox = document.getElementById('giveToContainer');
+        const reqBtn = document.getElementById('compatRequisitionBtn');
+
+        if (!compatRules[group]) return;
+
+        title.textContent = `Blood Group ${group}`;
+        reqBtn.href = `{% url 'request_blood' %}?group=${encodeURIComponent(group)}`;
+        reqBtn.innerHTML = `<i class="bi bi-send-fill me-1"></i> Requisition ${group} Blood`;
+
+        // Calculate safe donors and sum available units
+        let totalUnits = 0;
+        receiveBox.innerHTML = '';
+        compatRules[group].receive.forEach(bg => {
+            const units = stockMap[bg] || 0;
+            totalUnits += units;
+            const tag = document.createElement('span');
+            tag.className = 'badge bg-white text-dark border border-2 border-success rounded-pill px-3 py-2 fs-6 shadow-sm';
+            tag.innerHTML = `<i class="bi bi-check-circle-fill text-success me-1"></i><strong>${bg}</strong> (${units} Units in Reserve)`;
+            receiveBox.appendChild(tag);
+        });
+
+        badge.textContent = `${totalUnits} Units Available in District`;
+
+        // Calculate safe recipients
+        giveBox.innerHTML = '';
+        compatRules[group].give.forEach(bg => {
+            const tag = document.createElement('span');
+            tag.className = 'badge bg-white text-dark border border-primary rounded-pill px-3 py-2 fs-6 shadow-sm';
+            tag.innerHTML = `<i class="bi bi-arrow-right-circle-fill text-primary me-1"></i><strong>${bg}</strong>`;
+            giveBox.appendChild(tag);
+        });
+    }
+
+    // Attach click events to pills
+    document.querySelectorAll('.compat-pill').forEach(btn => {
+        btn.addEventListener('click', function () {
+            document.querySelectorAll('.compat-pill').forEach(b => {
+                b.classList.remove('btn-danger', 'active');
+                b.classList.add('btn-outline-danger');
+            });
+            this.classList.remove('btn-outline-danger');
+            this.classList.add('btn-danger', 'active');
+            updateCompatibility(this.getAttribute('data-group'));
+        });
+    });
+
+    // Initialize with O+
+    updateCompatibility('O+');
+});
+</script>
+{% endblock %}

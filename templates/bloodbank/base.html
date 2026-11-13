@@ -1,0 +1,327 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}LifeStream | Blood Bank Management System{% endblock %}</title>
+
+    <!-- Medical Favicon (Crisp SVG Blood Drop) -->
+    <link rel="icon" type="image/svg+xml" href="{% url 'favicon' %}">
+
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Leaflet.js Interactive Map CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- MAIN NAVBAR -->
+    <nav class="navbar navbar-expand-lg main-navbar">
+        <div class="container-fluid px-3 px-lg-4 px-xl-5">
+            <a class="navbar-brand-logo flex-shrink-0" href="{% url 'home' %}">
+                <div class="logo-icon-box">
+                    <i class="bi bi-droplet-half"></i>
+                </div>
+                <div>
+                    <div class="logo-text-title">Life<span>Stream</span></div>
+                    <span class="logo-tagline">Blood Bank Network</span>
+                </div>
+            </a>
+
+            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMainContent" aria-controls="navbarMainContent" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="bi bi-list fs-1 text-danger"></i>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarMainContent">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0 align-items-lg-center">
+                    <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}"><i class="bi bi-house-door"></i> Home</a></li>
+                    <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'donors' %}active{% endif %}" href="{% url 'donors' %}"><i class="bi bi-people"></i> Find Donors</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'request_blood' %}active{% endif %}" href="{% url 'request_blood' %}">
+                            {% if is_donor %}
+                                <i class="bi bi-heart-pulse-fill text-danger"></i> Urgent Needs (Donate)
+                            {% elif is_hospital %}
+                                <i class="bi bi-hospital text-primary"></i> Hospital Requisition
+                            {% else %}
+                                <i class="bi bi-heart-pulse"></i> Request Blood
+                            {% endif %}
+                        </a>
+                    </li>
+                    <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'inventory' %}active{% endif %}" href="{% url 'inventory' %}"><i class="bi bi-pie-chart"></i> Live Inventory</a></li>
+                    <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'camps' %}active{% endif %}" href="{% url 'camps' %}"><i class="bi bi-calendar-check"></i> Donation Camps</a></li>
+                </ul>
+
+                <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0 flex-shrink-0" id="navAuthActions">
+                    {% if user.is_authenticated %}
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-danger dropdown-toggle rounded-pill px-3 py-2 d-flex align-items-center gap-2 text-nowrap" type="button" id="userMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                {% if is_admin_role %}
+                                    <span class="badge bg-dark text-white rounded-pill"><i class="bi bi-shield-lock-fill text-danger me-1"></i>Admin</span>
+                                {% elif is_hospital %}
+                                    <span class="badge bg-primary text-white rounded-pill"><i class="bi bi-hospital-fill me-1"></i>Hospital</span>
+                                {% else %}
+                                    <span class="badge bg-danger text-white rounded-pill"><i class="bi bi-droplet-fill me-1"></i>Donor</span>
+                                {% endif %}
+                                <span class="fw-bold text-truncate d-inline-block text-start" style="max-width: 150px;" title="{% if is_hospital and user_hospital_profile %}{{ user_hospital_profile.name }}{% else %}{{ user.first_name|default:user.username }}{% endif %}">
+                                    {% if is_hospital and user_hospital_profile %}
+                                        {{ user_hospital_profile.short_name|default:user_hospital_profile.name }}
+                                    {% else %}
+                                        {{ user.first_name|default:user.username }}
+                                    {% endif %}
+                                </span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2" aria-labelledby="userMenuDropdown">
+                                <li>
+                                    <a class="dropdown-item py-2" href="{% url 'dashboard_redirect' %}">
+                                        <i class="bi bi-speedometer2 text-danger me-2"></i>My Dashboard
+                                    </a>
+                                </li>
+                                {% if is_admin_role or user.is_superuser %}
+                                <li>
+                                    <a class="dropdown-item py-2" href="/admin/" target="_blank">
+                                        <i class="bi bi-gear-fill text-dark me-2"></i>Django Admin Panel
+                                    </a>
+                                </li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item text-danger py-2" href="{% url 'logout' %}">
+                                        <i class="bi bi-box-arrow-right me-2"></i>Sign Out
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-outline-danger btn-sm px-3 py-2 rounded-pill fw-bold">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+                        </a>
+                        <a href="{% url 'signup' %}" class="btn btn-primary-red btn-sm px-3 py-2 rounded-pill text-white fw-bold">
+                            <i class="bi bi-person-plus-fill me-1"></i> Register
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- DJANGO MESSAGES / ALERTS -->
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-4 shadow-sm border-0 d-flex align-items-center gap-2 mb-2" role="alert">
+            {% if message.tags == 'success' %}
+                <i class="bi bi-check-circle-fill text-success fs-5"></i>
+            {% elif message.tags == 'danger' or message.tags == 'error' %}
+                <i class="bi bi-exclamation-triangle-fill text-danger fs-5"></i>
+            {% elif message.tags == 'warning' %}
+                <i class="bi bi-exclamation-circle-fill text-warning fs-5"></i>
+            {% else %}
+                <i class="bi bi-info-circle-fill text-info fs-5"></i>
+            {% endif %}
+            <div class="flex-grow-1">{{ message }}</div>
+            <button type="button" class="btn-close shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- MAIN PAGE CONTENT -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer-section">
+        <div class="container">
+            <div class="row g-4 mb-5">
+                <div class="col-lg-4 col-md-6">
+                    <div class="footer-brand mb-3">
+                        <div class="logo-icon-box mb-2">
+                            <i class="bi bi-droplet-half"></i>
+                        </div>
+                        <h4 class="text-white fw-bold mb-0">Life<span class="text-danger">Stream</span></h4>
+                        <span class="text-white-50 small">Blood Bank Management Network</span>
+                    </div>
+                    <p class="text-slate-muted small mb-4">
+                        A mission-critical transfusion network connecting verified blood donors, patients, and accredited healthcare facilities across East Singhbhum district, Jharkhand.
+                    </p>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-danger rounded-pill px-3 py-2">
+                            <i class="bi bi-shield-check me-1"></i> East Singhbhum Geofence Active
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="text-white fw-bold mb-3">Quick Navigation</h6>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'home' %}"><i class="bi bi-chevron-right text-danger"></i> Home</a></li>
+                        <li><a href="{% url 'donors' %}"><i class="bi bi-chevron-right text-danger"></i> Find Donors</a></li>
+                        <li><a href="{% url 'request_blood' %}"><i class="bi bi-chevron-right text-danger"></i> Request Blood</a></li>
+                        <li><a href="{% url 'inventory' %}"><i class="bi bi-chevron-right text-danger"></i> Live Stock</a></li>
+                        <li><a href="{% url 'camps' %}"><i class="bi bi-chevron-right text-danger"></i> Donation Camps</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="text-white fw-bold mb-3">Portal Access</h6>
+                    <ul class="footer-links">
+                        {% if user.is_authenticated %}
+                            <li><a href="{% url 'dashboard_redirect' %}"><i class="bi bi-speedometer2 text-danger"></i> My Dashboard</a></li>
+                            {% if is_admin_role or user.is_superuser %}
+                            <li><a href="/admin/" target="_blank"><i class="bi bi-shield-lock text-danger"></i> Django Admin Panel (/admin)</a></li>
+                            {% endif %}
+                            <li><a href="{% url 'logout' %}"><i class="bi bi-box-arrow-right text-danger"></i> Log Out</a></li>
+                        {% else %}
+                            <li><a href="{% url 'login' %}"><i class="bi bi-box-arrow-in-right text-danger"></i> Portal Sign In</a></li>
+                            <li><a href="{% url 'signup' %}?role=DONOR"><i class="bi bi-person-heart text-danger"></i> Register as Donor</a></li>
+                            <li><a href="{% url 'signup' %}?role=HOSPITAL"><i class="bi bi-hospital text-danger"></i> Hospital Portal Registration</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="text-white fw-bold mb-3">Emergency Helpdesk</h6>
+                    <p class="text-slate-muted small mb-2">Round-the-clock rapid blood dispatch &amp; donor mobilization:</p>
+                    <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#emergencyHelplineModal" class="d-inline-flex align-items-center gap-2 text-danger fw-bold fs-5 text-decoration-none mb-3" title="Open 24/7 Emergency Helpline">
+                        <i class="bi bi-telephone-fill"></i> 1800-RED-LIFE
+                    </a>
+                    <div class="small text-slate-muted">
+                        <i class="bi bi-geo-alt-fill text-danger me-1"></i> Central Coordinating Center: Bistupur, Jamshedpur - 831001
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-4 border-top border-secondary border-opacity-25 text-center text-slate-muted small">
+                &copy; 2026 LifeStream Blood Bank Management System. Built with Django Backend &amp; PostgreSQL/SQLite. All Rights Reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating Emergency Helpline Button -->
+    <button type="button" class="floating-call-btn" id="emergencyCallBtn" data-bs-toggle="modal" data-bs-target="#emergencyHelplineModal" title="24/7 Emergency Blood Helpline" aria-label="Emergency Blood Helpline">
+        <i class="bi bi-telephone-fill"></i>
+    </button>
+    <button class="back-to-top" id="backToTopBtn" aria-label="Back to Top"><i class="bi bi-chevron-up"></i></button>
+
+    <!-- Emergency Helpline Modal (Smart Desktop & Mobile Handler) -->
+    <div class="modal fade" id="emergencyHelplineModal" tabindex="-1" aria-labelledby="emergencyHelplineModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 18px; overflow: hidden;">
+                <div class="modal-header text-white p-4" style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle bg-white text-danger d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; font-size: 1.4rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                            <i class="bi bi-telephone-fill"></i>
+                        </div>
+                        <div>
+                            <h5 class="modal-title fw-bold mb-0" id="emergencyHelplineModalLabel">24/7 Emergency Blood Helpline</h5>
+                            <span class="badge bg-white text-danger fw-bold text-uppercase mt-1" style="font-size: 0.72rem; letter-spacing: 0.5px;">
+                                <i class="bi bi-broadcast me-1 text-danger"></i> Central Dispatch Active
+                            </span>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <p class="text-muted small mb-3">Round-the-clock emergency blood unit allocation &amp; donor mobilization hotline for East Singhbhum district:</p>
+                    
+                    <div class="p-3 rounded-4 mb-3" style="background: #fef2f2; border: 1.5px dashed #f87171;">
+                        <span class="text-secondary small text-uppercase fw-bold d-block mb-1">Toll-Free Emergency Helpline</span>
+                        <h2 class="text-danger fw-bolder mb-0 font-monospace" style="letter-spacing: 1px;">1800-RED-LIFE</h2>
+                        <span class="text-muted small fw-semibold">(1800-733-5433)</span>
+                    </div>
+
+                    <div class="d-grid gap-2 mb-3">
+                        <button type="button" class="btn btn-danger fw-bold py-2 shadow-sm" id="copyHelplineBtn" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                            <i class="bi bi-clipboard me-1" id="copyIcon"></i> <span id="copyBtnText">Copy Helpline Number</span>
+                        </button>
+                        <a href="https://wa.me/919431100000?text=Hello%20LifeStream,%20I%20have%20an%20urgent%20blood%20requirement%20in%20East%20Singhbhum." target="_blank" rel="noopener noreferrer" class="btn btn-outline-success fw-semibold py-2">
+                            <i class="bi bi-whatsapp me-1 text-success"></i> WhatsApp Emergency Desk
+                        </a>
+                    </div>
+
+                    <div class="p-3 bg-light rounded-3 text-start small border border-light-subtle">
+                        <div class="d-flex align-items-start gap-2 mb-2">
+                            <i class="bi bi-hospital text-danger mt-1"></i>
+                            <div><strong>District Coordinating Hub:</strong> Central Blood Bank Coordinating Center, Bistupur, Jamshedpur (East Singhbhum).</div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 text-muted">
+                            <i class="bi bi-clock-history text-danger"></i>
+                            <div>Average Emergency Response Time: <strong>&lt; 15 Minutes</strong></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light p-3 border-0 justify-content-center">
+                    <small class="text-muted"><i class="bi bi-shield-check text-success me-1"></i> Certified Under National Blood Transfusion Council Guidelines</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5.3 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Leaflet.js Interactive Map Engine -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <script>
+        // Emergency Helpline Button Handler (Smart Desktop & Mobile Handling)
+        const callBtn = document.getElementById('emergencyCallBtn');
+        if (callBtn) {
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            if (isMobile) {
+                // On mobile phones: bypass modal and directly launch phone dialer
+                callBtn.removeAttribute('data-bs-toggle');
+                callBtn.removeAttribute('data-bs-target');
+                callBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    window.location.href = 'tel:18007335433';
+                });
+            }
+        }
+
+        // Copy Helpline Number Button
+        const copyBtn = document.getElementById('copyHelplineBtn');
+        if (copyBtn) {
+            copyBtn.addEventListener('click', function () {
+                navigator.clipboard.writeText('18007335433').then(function () {
+                    const textSpan = document.getElementById('copyBtnText');
+                    const icon = document.getElementById('copyIcon');
+                    textSpan.textContent = 'Copied to Clipboard! ✓';
+                    icon.className = 'bi bi-check2-circle text-white';
+                    copyBtn.classList.remove('btn-danger');
+                    copyBtn.classList.add('btn-success');
+                    setTimeout(() => {
+                        textSpan.textContent = 'Copy Helpline Number';
+                        icon.className = 'bi bi-clipboard';
+                        copyBtn.classList.remove('btn-success');
+                        copyBtn.classList.add('btn-danger');
+                    }, 2500);
+                }).catch(function () {
+                    prompt('Helpline Number:', '1800-733-5433');
+                });
+            });
+        }
+
+        // Back to top behavior
+        const btt = document.getElementById('backToTopBtn');
+        if (btt) {
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 300) {
+                    btt.classList.add('visible');
+                } else {
+                    btt.classList.remove('visible');
+                }
+            });
+            btt.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

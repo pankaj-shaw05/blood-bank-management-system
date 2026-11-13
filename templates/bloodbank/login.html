@@ -1,0 +1,184 @@
+{% extends 'bloodbank/base.html' %}
+{% load static %}
+
+{% block title %}Sign In | LifeStream Blood Bank Network{% endblock %}
+
+{% block content %}
+<!-- AUTHENTICATION CONTAINER -->
+<div class="auth-wrapper">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xl-10">
+                <div class="auth-card">
+                    <div class="row g-0">
+                        <!-- SIDEBAR ILLUSTRATION & HIGHLIGHTS -->
+                        <div class="col-lg-5 auth-sidebar">
+                            <div>
+                                <div class="badge-pulse bg-danger text-white mb-3">
+                                    <i class="bi bi-shield-check me-1"></i> Secure Health Gateway
+                                </div>
+                                <h3 class="fw-bold mb-3">Connecting Compassion With Immediate Need</h3>
+                                <p class="text-white-50 small mb-4">
+                                    Log in to access your donation history, update your blood availability status, or manage hospital blood requisitions across East Singhbhum in real time.
+                                </p>
+
+                                <div class="p-3 rounded-3 bg-white bg-opacity-10 border border-white border-opacity-25 mb-3">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <i class="bi bi-award text-warning fs-3"></i>
+                                        <div>
+                                            <strong class="d-block text-white small">LifeSaver Digital Badge</strong>
+                                            <small class="text-white-50">Earn recognitions for repeat voluntary donations</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pt-4 border-top border-white border-opacity-25 small text-white-50">
+                                <i class="bi bi-telephone-fill text-danger me-1"></i> 24/7 Helpline: 1800-RED-LIFE (1800-733-5433)
+                            </div>
+                        </div>
+
+                        <!-- LOGIN FORM CONTAINER -->
+                        <div class="col-lg-7 auth-form-container">
+                            <div class="mb-4">
+                                <h3 class="fw-bold mb-1">Sign In</h3>
+                                <p class="text-muted small">Select your portal access role and enter your credentials.</p>
+                            </div>
+
+                            <!-- ROLE SELECTOR PILLS (STRICTLY DONOR & HOSPITAL) -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold small text-muted">Select Your Role:</label>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <div class="flex-grow-1">
+                                        <input type="radio" class="btn-check" name="authRole" id="roleDonor" value="Donor" form="loginForm" {% if active_role != 'HOSPITAL' %}checked{% endif %}>
+                                        <label class="btn btn-outline-danger w-100 btn-sm py-2" for="roleDonor">
+                                            <i class="bi bi-person-heart me-1"></i> Blood Donor
+                                        </label>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <input type="radio" class="btn-check" name="authRole" id="roleHospital" value="Hospital" form="loginForm" {% if active_role == 'HOSPITAL' %}checked{% endif %}>
+                                        <label class="btn btn-outline-danger w-100 btn-sm py-2" for="roleHospital">
+                                            <i class="bi bi-hospital me-1"></i> Hospital / Clinic
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- LOGIN FORM -->
+                            <form method="POST" action="{% url 'login' %}" id="loginForm">
+                                {% csrf_token %}
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold small" for="loginUsername">Username or Email Address <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light text-danger"><i class="bi bi-person"></i></span>
+                                        <input type="text" name="username" class="form-control" id="loginUsername" placeholder="e.g. rahul_donor or email" required autofocus autocomplete="username">
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label fw-bold small mb-0" for="loginPassword">Password <span class="text-danger">*</span></label>
+                                    </div>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light text-danger"><i class="bi bi-key"></i></span>
+                                        <input type="password" name="password" class="form-control" id="loginPassword" placeholder="Enter your password" required autocomplete="current-password">
+                                        <button class="btn btn-light border password-toggle-btn" type="button" data-target="loginPassword" aria-label="Toggle password view">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex align-items-center justify-content-between mb-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="rememberMeCheck" checked>
+                                        <label class="form-check-label small text-muted" for="rememberMeCheck">Keep me signed in</label>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary-red w-100 py-3 mb-3 fs-6">
+                                    <i class="bi bi-box-arrow-in-right me-1"></i> Sign In to Account
+                                </button>
+                            </form>
+
+                            <!-- ONE-CLICK DEMO ACCOUNTS HELPER (DONOR & HOSPITAL ONLY) -->
+                            <div class="p-3 bg-light rounded-3 border mb-3">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <span class="small fw-bold text-muted"><i class="bi bi-lightning-charge-fill text-warning me-1"></i> Quick Demo Test Autofill:</span>
+                                </div>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button type="button" class="btn btn-outline-dark btn-sm flex-grow-1 btn-fill-demo fw-bold" data-user="admin" data-pass="admin" data-role="Admin">
+                                        <i class="bi bi-shield-lock-fill me-1"></i> Admin (admin / admin)
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm flex-grow-1 btn-fill-demo" data-user="donor" data-pass="donor123" data-role="Donor">
+                                        <i class="bi bi-person me-1"></i> Donor (donor / donor123)
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger btn-sm flex-grow-1 btn-fill-demo fw-bold" data-user="mgm" data-pass="hospital123" data-role="Hospital">
+                                        <i class="bi bi-hospital me-1"></i> MGM (mgm / hospital123)
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm flex-grow-1 btn-fill-demo" data-user="tata_hospital" data-pass="hospital123" data-role="Hospital">
+                                        <i class="bi bi-hospital me-1"></i> TMH (tata_hospital)
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="text-center pt-2">
+                                <span class="text-muted small">Don't have an account yet? </span>
+                                <a href="{% url 'signup' %}" class="fw-bold text-danger text-decoration-none small">Register Here</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Quick Demo Autofill button handler
+    const demoBtns = document.querySelectorAll('.btn-fill-demo');
+    const userInput = document.getElementById('loginUsername');
+    const passInput = document.getElementById('loginPassword');
+    const roleDonor = document.getElementById('roleDonor');
+    const roleHospital = document.getElementById('roleHospital');
+
+    demoBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const user = this.getAttribute('data-user');
+            const pass = this.getAttribute('data-pass');
+            const role = this.getAttribute('data-role');
+
+            if (userInput) userInput.value = user;
+            if (passInput) passInput.value = pass;
+
+            if (role === 'Donor' && roleDonor) {
+                roleDonor.checked = true;
+            } else if (role === 'Hospital' && roleHospital) {
+                roleHospital.checked = true;
+            }
+        });
+    });
+
+    // Password visibility toggle
+    document.querySelectorAll('.password-toggle-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const targetInput = document.getElementById(targetId);
+            const icon = this.querySelector('i');
+            if (targetInput) {
+                if (targetInput.type === 'password') {
+                    targetInput.type = 'text';
+                    icon.classList.remove('bi-eye');
+                    icon.classList.add('bi-eye-slash');
+                } else {
+                    targetInput.type = 'password';
+                    icon.classList.remove('bi-eye-slash');
+                    icon.classList.add('bi-eye');
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

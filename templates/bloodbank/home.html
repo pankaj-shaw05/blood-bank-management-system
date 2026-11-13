@@ -1,0 +1,646 @@
+{% extends 'bloodbank/base.html' %}
+{% load static %}
+
+{% block title %}LifeStream | Emergency Blood Bank & Transfusion Network{% endblock %}
+
+{% block content %}
+<!-- HERO SECTION WITH VIDEO BACKGROUND -->
+<section class="hero-section position-relative overflow-hidden">
+    <!-- Background Video -->
+    <div class="hero-video-wrapper">
+        <video id="heroBackgroundVideo" class="hero-background-video" autoplay loop muted playsinline poster="https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&w=1920&q=80">
+            <source src="{% static 'assets/hero-bg.mp4' %}" type="video/mp4">
+            <source src="https://assets.mixkit.co/videos/46368/46368-720.mp4" type="video/mp4">
+        </video>
+        <div class="hero-video-overlay"></div>
+        <div class="hero-overlay-pattern"></div>
+    </div>
+
+    <div class="container position-relative" style="z-index: 10;">
+        <div class="hero-content-centered">
+            <!-- Telemetry Live Pill -->
+            <div class="hero-live-pill mb-3">
+                <span class="live-beacon-dot"></span>
+                <span>EAST SINGHBHUM GEOFENCE ACTIVE &bull; {{ total_hospitals|default:"8" }} VERIFIED FACILITIES</span>
+            </div>
+
+            <!-- Hero Headline -->
+            <h1 class="hero-title-centered mb-3">
+                Every Drop Counts. <br>
+                <span class="hero-gradient-text">Give Blood, Save Lives.</span>
+            </h1>
+
+            <p class="hero-subtitle mb-4">
+                Connect directly with verified blood donors, hospitals, and component storage centers across East Singhbhum district, Jharkhand.
+            </p>
+
+            <!-- Feature 1: Glassmorphism Quick Donor & Blood Search -->
+            <div class="hero-glass-search-card mb-4">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-search-heart text-danger fs-5"></i>
+                        <span class="text-white fw-bold">Quick Donor &amp; Availability Finder</span>
+                    </div>
+                    <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50 small">
+                        <i class="bi bi-geo-alt-fill me-1"></i>East Singhbhum Network
+                    </span>
+                </div>
+                <form method="GET" action="{% url 'donors' %}">
+                    <div class="row g-2 align-items-center">
+                        <div class="col-md-5">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0 text-danger"><i class="bi bi-droplet-half"></i></span>
+                                <select name="blood_group" class="form-select border-start-0" aria-label="Select Blood Group">
+                                    <option value="ALL">All Blood Groups</option>
+                                    {% for bg in blood_groups %}
+                                    <option value="{{ bg }}">{{ bg }} Blood Group</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0 text-danger"><i class="bi bi-geo-alt"></i></span>
+                                <select name="locality" class="form-select border-start-0" aria-label="Select Locality">
+                                    <option value="ALL">All East Singhbhum</option>
+                                    {% for loc in localities %}
+                                    <option value="{{ loc }}">{{ loc }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-primary-red w-100 fw-bold py-2 shadow-sm">
+                                <i class="bi bi-search me-1"></i> Find Donors
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                <!-- Quick Blood Group Match Pills -->
+                <div class="d-flex flex-wrap align-items-center gap-2 mt-3 pt-2 border-top border-secondary border-opacity-25">
+                    <span class="text-white-50 small fw-semibold">Quick Filter:</span>
+                    <a href="{% url 'donors' %}?blood_group=O%2B" class="hero-quick-tag-pill"><strong>O+</strong> <span class="badge bg-danger p-1" style="font-size: 0.62rem;">High Demand</span></a>
+                    <a href="{% url 'donors' %}?blood_group=O-" class="hero-quick-tag-pill"><strong>O-</strong> <span class="badge bg-warning text-dark p-1" style="font-size: 0.62rem;">Universal</span></a>
+                    <a href="{% url 'donors' %}?blood_group=B%2B" class="hero-quick-tag-pill"><strong>B+</strong></a>
+                    <a href="{% url 'donors' %}?blood_group=A%2B" class="hero-quick-tag-pill"><strong>A+</strong></a>
+                    <a href="{% url 'donors' %}?blood_group=AB%2B" class="hero-quick-tag-pill"><strong>AB+</strong></a>
+                    <a href="{% url 'donors' %}" class="hero-quick-tag-pill text-white-50"><i class="bi bi-arrow-right-short"></i> All Donors</a>
+                </div>
+            </div>
+
+            <!-- Hero Action Buttons -->
+            <div class="d-flex flex-wrap justify-content-center align-items-center gap-3 mb-4">
+                <a href="{% url 'request_blood' %}" class="btn btn-primary-red hero-action-btn shadow-lg">
+                    <i class="bi bi-heart-pulse-fill me-2"></i> Request Blood Urgently
+                </a>
+                <a href="{% url 'donors' %}" class="btn btn-outline-light hero-action-btn">
+                    <i class="bi bi-people me-2"></i> Browse All Donors
+                </a>
+                {% if not user.is_authenticated %}
+                <a href="{% url 'signup' %}?role=DONOR" class="btn btn-light hero-action-btn text-danger fw-bold">
+                    <i class="bi bi-person-heart me-2"></i> Register as Donor
+                </a>
+                {% endif %}
+            </div>
+
+            <!-- Centered Feature Badges -->
+            <div class="hero-feature-tags-centered mb-4">
+                <div class="hero-tag-item">
+                    <i class="bi bi-shield-check"></i>
+                    <span>100% Tested &amp; Safe</span>
+                </div>
+                <div class="hero-tag-item">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                    <span>Instant Donor SMS Alert</span>
+                </div>
+                <div class="hero-tag-item">
+                    <i class="bi bi-heart-fill"></i>
+                    <span>Zero Commercial Cost</span>
+                </div>
+                <div class="hero-tag-item">
+                    <i class="bi bi-broadcast"></i>
+                    <span>24/7 National Dispatch</span>
+                </div>
+            </div>
+
+            <!-- Centered Trust Strip / Social Proof -->
+            <div class="hero-trust-strip-centered">
+                <div class="avatar-stack">
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80" alt="Donor avatar">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80" alt="Donor avatar">
+                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80" alt="Donor avatar">
+                    <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80" alt="Donor avatar">
+                </div>
+                <div>
+                    <div class="trust-stars mb-1">
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <span class="ms-1 fw-bold text-white">4.9 / 5</span>
+                    </div>
+                    <span class="trust-rating-text text-white-50 small d-block">Trusted by <strong>14,800+</strong> voluntary donors &amp; hospital blood coordinators</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Feature 2: LIVE EMERGENCY BROADCAST TICKER -->
+<section class="emergency-ticker-strip">
+    <div class="container-fluid px-3 px-lg-4">
+        <div class="d-flex align-items-center justify-content-between gap-3">
+            <div class="ticker-beacon-badge">
+                <span class="ticker-beacon-dot"></span>
+                <span>Emergency Broadcast</span>
+            </div>
+            <div class="ticker-marquee-wrapper flex-grow-1">
+                {% for req in active_requests %}
+                <div class="ticker-request-item">
+                    <i class="bi bi-hospital text-danger"></i>
+                    <strong>{{ req.hospital_name }}</strong>:
+                    <span class="badge bg-danger px-2 py-0.5">{{ req.blood_group }}</span>
+                    <span>{{ req.units_needed }} Unit{{ req.units_needed|pluralize }} needed for {{ req.patient_name }} ({{ req.city }})</span>
+                    <a href="{% url 'request_blood' %}" class="ticker-cta-link ms-1">
+                        <i class="bi bi-heart-pulse-fill me-1"></i> I Can Donate
+                    </a>
+                    <span class="text-secondary mx-2">&bull;</span>
+                </div>
+                {% empty %}
+                <div class="ticker-request-item text-white-50">
+                    <i class="bi bi-check-circle-fill text-success me-1"></i>
+                    <span>All 8 East Singhbhum accredited hospital blood stocks currently stable &bull; Verified donor mobilization network on standby 24/7.</span>
+                </div>
+                {% endfor %}
+            </div>
+            <a href="{% url 'request_blood' %}" class="btn btn-sm btn-outline-danger text-white rounded-pill px-3 text-nowrap d-none d-md-inline-flex">
+                View Requisitions ({{ active_requests|length }}) <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- LIVE STATS TELEMETRY SECTION -->
+<section class="py-4 bg-light border-bottom">
+    <div class="container">
+        <div class="row g-3 text-center">
+            <div class="col-6 col-md-3">
+                <div class="p-3 bg-white rounded-4 border shadow-sm stat-counter-box h-100">
+                    <div class="text-danger mb-1 fs-4"><i class="bi bi-droplet-half"></i></div>
+                    <h3 class="fw-bold text-danger mb-0 stat-counter" data-target="{{ total_units }}">{{ total_units }}</h3>
+                    <span class="small text-muted fw-bold">Units in Central Stock</span>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-3 bg-white rounded-4 border shadow-sm stat-counter-box h-100">
+                    <div class="text-dark mb-1 fs-4"><i class="bi bi-people-fill"></i></div>
+                    <h3 class="fw-bold text-dark mb-0 stat-counter" data-target="{{ total_donors }}">{{ total_donors }}</h3>
+                    <span class="small text-muted fw-bold">Verified Donors</span>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-3 bg-white rounded-4 border shadow-sm stat-counter-box h-100">
+                    <div class="text-danger mb-1 fs-4"><i class="bi bi-hospital"></i></div>
+                    <h3 class="fw-bold text-danger mb-0 stat-counter" data-target="{{ total_hospitals }}">{{ total_hospitals }}</h3>
+                    <span class="small text-muted fw-bold">Geofenced Hospitals</span>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-3 bg-white rounded-4 border shadow-sm stat-counter-box h-100">
+                    <div class="text-success mb-1 fs-4"><i class="bi bi-lightning-charge-fill"></i></div>
+                    <h3 class="fw-bold text-success mb-0">&lt; 15 Mins</h3>
+                    <span class="small text-muted fw-bold">Average Dispatch</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Feature 3: INTERACTIVE BLOOD COMPATIBILITY MATRIX ("WHO CAN YOU SAVE?") -->
+<section class="compatibility-section py-5 border-bottom">
+    <div class="container">
+        <div class="text-center mb-4">
+            <span class="badge bg-danger-subtle text-danger rounded-pill px-3 py-1 fw-bold text-uppercase mb-2">
+                <i class="bi bi-droplet-half me-1"></i> Transfusion Science &amp; Matching
+            </span>
+            <h2 class="fw-bold mb-2">Blood Compatibility: Who Can You Save?</h2>
+            <p class="text-muted mx-auto" style="max-width: 680px;">
+                Select your blood group below to discover your medical compatibility match — which patients can safely receive your blood, and who you can receive blood from in an emergency.
+            </p>
+        </div>
+
+        <!-- 8 Blood Group Selector Buttons -->
+        <div class="d-flex flex-wrap justify-content-center gap-2 gap-md-3 mb-4" id="bloodSelectorContainer">
+            <button type="button" class="blood-selector-btn" data-group="O-">O-</button>
+            <button type="button" class="blood-selector-btn active" data-group="O+">O+</button>
+            <button type="button" class="blood-selector-btn" data-group="A-">A-</button>
+            <button type="button" class="blood-selector-btn" data-group="A+">A+</button>
+            <button type="button" class="blood-selector-btn" data-group="B-">B-</button>
+            <button type="button" class="blood-selector-btn" data-group="B+">B+</button>
+            <button type="button" class="blood-selector-btn" data-group="AB-">AB-</button>
+            <button type="button" class="blood-selector-btn" data-group="AB+">AB+</button>
+        </div>
+
+        <!-- Dynamic Compatibility Display -->
+        <div class="row g-4 justify-content-center mb-4">
+            <!-- Can Donate To -->
+            <div class="col-md-6 col-lg-5">
+                <div class="compat-card donate-theme">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="rounded-circle bg-success bg-opacity-10 text-success d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <i class="bi bi-arrow-up-right-circle-fill fs-5"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold text-dark mb-0">You Can DONATE To</h6>
+                                <small class="text-muted">Compatible Patient Recipients</small>
+                            </div>
+                        </div>
+                        <span class="badge bg-success-subtle text-success fw-bold px-2 py-1 rounded-pill" id="donateCountBadge">4 Groups</span>
+                    </div>
+                    <p class="small text-muted mb-3">Patients with these blood groups can safely receive your red blood cells:</p>
+                    <div class="d-flex flex-wrap align-items-center" id="canDonatePills">
+                        <!-- Injected dynamically via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Can Receive From -->
+            <div class="col-md-6 col-lg-5">
+                <div class="compat-card receive-theme">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <i class="bi bi-arrow-down-left-circle-fill fs-5"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold text-dark mb-0">You Can RECEIVE From</h6>
+                                <small class="text-muted">Compatible Blood Donors</small>
+                            </div>
+                        </div>
+                        <span class="badge bg-primary-subtle text-primary fw-bold px-2 py-1 rounded-pill" id="receiveCountBadge">2 Groups</span>
+                    </div>
+                    <p class="small text-muted mb-3">In an emergency, you can safely receive transfusions from donors with:</p>
+                    <div class="d-flex flex-wrap align-items-center" id="canReceivePills">
+                        <!-- Injected dynamically via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scientific Fact & Fast Action Strip -->
+            <div class="col-lg-10">
+                <div class="p-3 p-md-4 rounded-4 bg-white border shadow-sm d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="rounded-3 bg-danger bg-opacity-10 text-danger p-2 fs-4 flex-shrink-0">
+                            <i class="bi bi-lightbulb-fill"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1 text-dark" id="compatGroupTitle">O-Positive (O+) Clinical Match</h6>
+                            <p class="small text-muted mb-0" id="compatFactText">
+                                O-Positive is the most common blood type and in highest demand across East Singhbhum emergency rooms for trauma &amp; surgical care.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex-shrink-0 text-md-end">
+                        <a href="{% url 'donors' %}?blood_group=O%2B" id="compatActionBtn" class="btn btn-sm btn-outline-danger fw-bold rounded-pill px-3 py-2">
+                            <i class="bi bi-search me-1"></i> Find O+ Donors
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- URGENT BLOOD REQUISITIONS PIPELINE -->
+<section class="py-5 bg-white">
+    <div class="container">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+            <div>
+                <span class="badge bg-danger-subtle text-danger rounded-pill px-3 py-1 fw-bold text-uppercase mb-2">Live Requisitions</span>
+                <h2 class="fw-bold mb-0">Emergency Requests in East Singhbhum</h2>
+                <small class="text-muted">Broadcasted directly by accredited hospitals and verified trauma units.</small>
+            </div>
+            <a href="{% url 'request_blood' %}" class="btn btn-outline-danger btn-sm rounded-pill mt-2 mt-md-0">
+                View All Requisitions <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        <div class="row g-4">
+            {% for req in active_requests %}
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden border-top border-4 border-danger">
+                    <div class="card-body p-3 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge bg-danger text-white fs-6 px-2 py-1">{{ req.blood_group }}</span>
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle small">{{ req.urgency }}</span>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-1">{{ req.patient_name }}</h6>
+                            <p class="small text-muted mb-2"><i class="bi bi-hospital text-danger me-1"></i>{{ req.hospital_name }}</p>
+                            <div class="bg-light p-2 rounded small mb-2">
+                                <div><strong>Units:</strong> {{ req.units_needed }} Unit{{ req.units_needed|pluralize }}</div>
+                                <div><strong>Locality:</strong> {{ req.city }}</div>
+                            </div>
+                        </div>
+                        <div class="pt-2 border-top">
+                            <a href="tel:{{ req.contact_phone }}" class="btn btn-sm btn-outline-danger w-100 mb-1">
+                                <i class="bi bi-telephone-fill me-1"></i> Call Coordinator
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-4 bg-light rounded-4">
+                <i class="bi bi-check-circle-fill text-success fs-1 mb-2 d-block"></i>
+                <h5 class="fw-bold">No Critical Shortages Reported</h5>
+                <p class="text-muted small mb-0">All recent hospital requisitions have been matched with active donors.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- HOW IT WORKS (3 SIMPLE STEPS) -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="badge bg-danger-subtle text-danger rounded-pill px-3 py-1 fw-bold text-uppercase mb-2">Process</span>
+            <h2 class="fw-bold">How LifeStream Works</h2>
+            <p class="text-muted">A fast, reliable pipeline connecting donors, patients, and hospitals.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-center">
+                    <div class="rounded-circle bg-danger bg-opacity-10 text-danger d-inline-flex align-items-center justify-content-center mx-auto mb-3" style="width: 70px; height: 70px;">
+                        <i class="bi bi-person-check fs-2"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">1. Register &amp; Verify</h5>
+                    <p class="text-muted small">Sign up as a blood donor or hospital. Your verified status is cataloged within the regional database.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-center">
+                    <div class="rounded-circle bg-danger bg-opacity-10 text-danger d-inline-flex align-items-center justify-content-center mx-auto mb-3" style="width: 70px; height: 70px;">
+                        <i class="bi bi-geo-alt fs-2"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">2. Geofence Matching</h5>
+                    <p class="text-muted small">When emergency blood is needed, our system matches nearby verified donors strictly within East Singhbhum boundary.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-center">
+                    <div class="rounded-circle bg-danger bg-opacity-10 text-danger d-inline-flex align-items-center justify-content-center mx-auto mb-3" style="width: 70px; height: 70px;">
+                        <i class="bi bi-droplet-half fs-2"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">3. Life Transfusion</h5>
+                    <p class="text-muted small">Direct communication coordinates rapid donation, component crossmatch, and bedside delivery.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- UPCOMING DONATION DRIVES -->
+<section class="py-5 bg-white">
+    <div class="container">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+            <div>
+                <span class="badge bg-danger-subtle text-danger rounded-pill px-3 py-1 fw-bold text-uppercase mb-2">Community Mobilization</span>
+                <h2 class="fw-bold mb-0">Upcoming Blood Donation Drives</h2>
+                <small class="text-muted">Join community camps organized across Jamshedpur and surrounding blocks.</small>
+            </div>
+            <a href="{% url 'camps' %}" class="btn btn-outline-danger btn-sm rounded-pill mt-2 mt-md-0">
+                View All Camps <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        <div class="row g-4">
+            {% for camp in upcoming_camps %}
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                    <img src="{{ camp.image_url }}" class="card-img-top" alt="{{ camp.title }}" style="height: 180px; object-fit: cover;">
+                    <div class="card-body p-3 d-flex flex-column justify-content-between">
+                        <div>
+                            <span class="badge bg-success-subtle text-success small mb-2"><i class="bi bi-calendar3 me-1"></i>{{ camp.date|date:"D, d M Y" }}</span>
+                            <h6 class="fw-bold text-dark mb-1">{{ camp.title }}</h6>
+                            <p class="small text-muted mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ camp.venue }}, {{ camp.city }}</p>
+                            <p class="small text-muted">{{ camp.description|truncatewords:15 }}</p>
+                        </div>
+                        <div class="pt-2 border-top d-flex justify-content-between align-items-center">
+                            <span class="small text-muted"><strong>{{ camp.registered_count }}</strong> registered</span>
+                            <a href="{% url 'camps' %}" class="btn btn-sm btn-primary-red">Register Now</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- CTA CALLOUT BANNER -->
+<section class="py-5 text-white" style="background: linear-gradient(135deg, #991b1b 0%, #dc2626 50%, #b91c1c 100%);">
+    <div class="container text-center py-4">
+        <h2 class="fw-bold mb-3">Are You a Healthcare Facility or Potential Donor?</h2>
+        <p class="lead mb-4 text-white-50">Join our verified East Singhbhum blood transfusion network today.</p>
+        <div class="d-flex flex-wrap justify-content-center gap-3">
+            <a href="{% url 'signup' %}?role=DONOR" class="btn btn-light text-danger fw-bold rounded-pill px-4 py-2">
+                <i class="bi bi-person-heart me-1"></i> Join as Blood Donor
+            </a>
+            <a href="{% url 'signup' %}?role=HOSPITAL" class="btn btn-outline-light fw-bold rounded-pill px-4 py-2">
+                <i class="bi bi-hospital me-1"></i> Register Hospital Facility
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // 1. Force Video Autoplay Fallback
+    const video = document.getElementById("heroBackgroundVideo");
+    if (video) {
+        video.muted = true;
+        video.defaultMuted = true;
+        
+        function forcePlayVideo() {
+            const playPromise = video.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(function() {
+                    video.muted = true;
+                    const triggerOnInteraction = function() {
+                        video.muted = true;
+                        video.play();
+                        window.removeEventListener("click", triggerOnInteraction);
+                        window.removeEventListener("scroll", triggerOnInteraction);
+                        window.removeEventListener("touchstart", triggerOnInteraction);
+                        window.removeEventListener("keydown", triggerOnInteraction);
+                    };
+                    window.addEventListener("click", triggerOnInteraction, { passive: true });
+                    window.addEventListener("scroll", triggerOnInteraction, { passive: true });
+                    window.addEventListener("touchstart", triggerOnInteraction, { passive: true });
+                    window.addEventListener("keydown", triggerOnInteraction, { passive: true });
+                });
+            }
+        }
+        forcePlayVideo();
+    }
+
+    // 2. Interactive Blood Compatibility Matrix Logic
+    const compatData = {
+        'O-': {
+            title: 'O-Negative (O-) Universal Red Cell Donor',
+            donateTo: ['O-', 'O+', 'A-', 'A+', 'B-', 'B+', 'AB-', 'AB+'],
+            receiveFrom: ['O-'],
+            fact: 'Universal Donor: O-Negative red blood cells can be safely given to ANY of the 8 blood types! Essential for trauma emergencies, accident units, and premature infants.',
+            param: 'O-'
+        },
+        'O+': {
+            title: 'O-Positive (O+) Clinical Match',
+            donateTo: ['O+', 'A+', 'B+', 'AB+'],
+            receiveFrom: ['O+', 'O-'],
+            fact: 'Most Demanded Blood Type: Over 38% of hospital patients need O-Positive. High demand for ongoing surgeries and emergency transfusions across East Singhbhum.',
+            param: 'O%2B'
+        },
+        'A-': {
+            title: 'A-Negative (A-) Rare Match',
+            donateTo: ['A-', 'A+', 'AB-', 'AB+'],
+            receiveFrom: ['A-', 'O-'],
+            fact: 'A-Negative donors can give to all A and AB patients. Only about 6% of the population carries this vital blood group.',
+            param: 'A-'
+        },
+        'A+': {
+            title: 'A-Positive (A+) High Demand Match',
+            donateTo: ['A+', 'AB+'],
+            receiveFrom: ['A+', 'A-', 'O+', 'O-'],
+            fact: 'Second Most Common Blood Type: Vital for routine chemotherapy, cancer care support, and elective trauma surgeries in district hospitals.',
+            param: 'A%2B'
+        },
+        'B-': {
+            title: 'B-Negative (B-) Rare Match',
+            donateTo: ['B-', 'B+', 'AB-', 'AB+'],
+            receiveFrom: ['B-', 'O-'],
+            fact: 'Rare Blood Type: Less than 2% of people have B-Negative blood. Your donation can save lives when rare inventory runs dangerously low.',
+            param: 'B-'
+        },
+        'B+': {
+            title: 'B-Positive (B+) Regional Primary Match',
+            donateTo: ['B+', 'AB+'],
+            receiveFrom: ['B+', 'B-', 'O+', 'O-'],
+            fact: 'Highly Prevalent in India: Approximately 32% of regional patients in East Singhbhum require B-Positive blood units.',
+            param: 'B%2B'
+        },
+        'AB-': {
+            title: 'AB-Negative (AB-) Ultra-Rare Match',
+            donateTo: ['AB-', 'AB+'],
+            receiveFrom: ['AB-', 'A-', 'B-', 'O-'],
+            fact: 'Rarest Blood Group (<1% of population). AB-Negative plasma and platelets are universal and can save lives across all categories.',
+            param: 'AB-'
+        },
+        'AB+': {
+            title: 'AB-Positive (AB+) Universal Recipient',
+            donateTo: ['AB+'],
+            receiveFrom: ['AB+', 'AB-', 'A+', 'A-', 'B+', 'B-', 'O+', 'O-'],
+            fact: 'Universal Red Cell Recipient: AB-Positive patients can safely receive red blood cells from ANY blood group in emergencies!',
+            param: 'AB%2B'
+        }
+    };
+
+    function renderCompatibility(group) {
+        const data = compatData[group];
+        if (!data) return;
+
+        // Update button active state
+        document.querySelectorAll('.blood-selector-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-group') === group);
+        });
+
+        // Update texts and badges
+        const titleEl = document.getElementById('compatGroupTitle');
+        const factEl = document.getElementById('compatFactText');
+        const donateBadge = document.getElementById('donateCountBadge');
+        const receiveBadge = document.getElementById('receiveCountBadge');
+        const actionBtn = document.getElementById('compatActionBtn');
+
+        if (titleEl) titleEl.textContent = data.title;
+        if (factEl) factEl.textContent = data.fact;
+        if (donateBadge) donateBadge.textContent = `${data.donateTo.length} Group${data.donateTo.length > 1 ? 's' : ''}`;
+        if (receiveBadge) receiveBadge.textContent = `${data.receiveFrom.length} Group${data.receiveFrom.length > 1 ? 's' : ''}`;
+        
+        if (actionBtn) {
+            actionBtn.href = `{% url 'donors' %}?blood_group=${data.param}`;
+            actionBtn.innerHTML = `<i class="bi bi-search me-1"></i> Find ${group} Donors`;
+        }
+
+        // Render donate pills
+        const donateContainer = document.getElementById('canDonatePills');
+        if (donateContainer) {
+            donateContainer.innerHTML = data.donateTo.map(bg => 
+                `<span class="compat-badge-pill green" title="Can donate to ${bg}">${bg}</span>`
+            ).join('');
+        }
+
+        // Render receive pills
+        const receiveContainer = document.getElementById('canReceivePills');
+        if (receiveContainer) {
+            receiveContainer.innerHTML = data.receiveFrom.map(bg => 
+                `<span class="compat-badge-pill blue" title="Can receive from ${bg}">${bg}</span>`
+            ).join('');
+        }
+    }
+
+    // Bind click handlers to blood buttons
+    document.querySelectorAll('.blood-selector-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const group = this.getAttribute('data-group');
+            renderCompatibility(group);
+        });
+    });
+
+    // Initialize default O+
+    renderCompatibility('O+');
+
+    // 3. Smooth Stats Counter Animation
+    function animateCounters() {
+        const counters = document.querySelectorAll('.stat-counter');
+        counters.forEach(counter => {
+            const target = parseInt(counter.getAttribute('data-target'), 10);
+            if (isNaN(target) || target <= 0) return;
+            
+            let current = 0;
+            const increment = Math.max(1, Math.ceil(target / 30));
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    counter.textContent = target;
+                    clearInterval(timer);
+                } else {
+                    counter.textContent = current;
+                }
+            }, 30);
+        });
+    }
+
+    if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounters();
+                    observer.disconnect();
+                }
+            });
+        }, { threshold: 0.15 });
+
+        const statsBox = document.querySelector('.stat-counter-box');
+        if (statsBox) observer.observe(statsBox);
+    } else {
+        animateCounters();
+    }
+});
+</script>
+{% endblock %}

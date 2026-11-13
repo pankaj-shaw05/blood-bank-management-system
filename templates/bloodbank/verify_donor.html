@@ -1,0 +1,197 @@
+{% extends 'bloodbank/base.html' %}
+{% load static %}
+
+{% block title %}Official Medical Donor Certificate & Verification | {{ donor_code }} | LifeStream{% endblock %}
+
+{% block extra_css %}
+<style>
+@media print {
+    /* Hide all layout elements for pure clean A4 certificate printing */
+    .main-navbar, .footer-section, .floating-call-btn, .back-to-top, .no-print, header, nav, footer {
+        display: none !important;
+    }
+    body, section {
+        background: #ffffff !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    .container {
+        max-width: 100% !important;
+        width: 100% !important;
+        padding: 0 !important;
+    }
+    .certificate-print-card {
+        border: 4px double #b91c1c !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        padding: 30px !important;
+        margin: 0 auto !important;
+        max-width: 800px !important;
+        page-break-inside: avoid;
+    }
+    .print-seal-badge {
+        display: block !important;
+    }
+}
+.certificate-print-card {
+    border: 3px double #dc2626;
+    background: #ffffff;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+    position: relative;
+}
+.certificate-watermark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-25deg);
+    font-size: 5rem;
+    font-weight: 900;
+    color: rgba(220, 38, 38, 0.04);
+    pointer-events: none;
+    text-transform: uppercase;
+    letter-spacing: 5px;
+    white-space: nowrap;
+    z-index: 1;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-light min-vh-100 d-flex align-items-center">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-xl-7">
+                <!-- PRINTABLE OFFICIAL MEDICAL CERTIFICATE CARD -->
+                <div class="card certificate-print-card rounded-4 overflow-hidden position-relative">
+                    <div class="certificate-watermark">OFFICIAL VERIFIED</div>
+
+                    <!-- Certificate Header -->
+                    <div class="p-4 p-md-5 text-center border-bottom border-danger border-opacity-25 bg-white position-relative" style="z-index: 2;">
+                        <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-3">
+                            <div class="d-flex align-items-center gap-2 text-start">
+                                <div class="rounded-circle bg-danger text-white d-inline-flex align-items-center justify-content-center" style="width: 44px; height: 44px; font-size: 1.3rem;">
+                                    <i class="bi bi-droplet-half"></i>
+                                </div>
+                                <div>
+                                    <strong class="d-block text-dark fw-bold text-uppercase" style="font-size: 0.88rem; letter-spacing: 0.5px;">Government of Jharkhand</strong>
+                                    <span class="text-muted small">Department of Health, Medical Education &amp; Family Welfare</span>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-danger rounded-pill px-3 py-1 font-monospace" style="font-size: 0.75rem;">CERT-JH-ES-{{ donor.id|stringformat:"04d" }}</span>
+                                <small class="text-muted d-block mt-1 font-monospace" style="font-size: 0.7rem;">Registry: EAST SINGHBHUM</small>
+                            </div>
+                        </div>
+
+                        <div class="my-3">
+                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1 mb-2 fw-bold text-uppercase">
+                                <i class="bi bi-patch-check-fill me-1"></i> Official Medical Verification &bull; NBTC Accredited
+                            </span>
+                            <h2 class="fw-bolder text-dark mb-1 font-serif" style="letter-spacing: 0.5px;">Certificate of Voluntary Blood Donation</h2>
+                            <p class="text-muted small mb-0">Official Medical Verification Record &bull; East Singhbhum Transfusion Authority</p>
+                        </div>
+                    </div>
+
+                    <!-- Certificate Body -->
+                    <div class="card-body p-4 p-md-5 position-relative" style="z-index: 2;">
+                        <div class="text-center mb-4">
+                            <p class="text-muted small mb-1">This is officially certified that the following humanitarian donor is registered &amp; medically verified:</p>
+                            <h2 class="fw-bold text-danger mb-1 display-6">{{ donor.full_name }}</h2>
+                            <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
+                                <span class="badge bg-danger fs-5 px-3 py-1 rounded-pill"><i class="bi bi-droplet-fill me-1"></i>Blood Group: {{ donor.blood_group }}</span>
+                                <span class="badge bg-dark rounded-pill px-3 py-1 font-monospace">{{ donor_code }}</span>
+                            </div>
+                            <span class="text-success fw-bold small"><i class="bi bi-shield-fill-check me-1"></i>Identity &amp; Serological Verification Passed</span>
+                        </div>
+
+                        <!-- Details Grid -->
+                        <div class="bg-light p-3 p-md-4 rounded-4 border mb-4">
+                            <div class="row g-3 small">
+                                <div class="col-6">
+                                    <span class="text-muted d-block">Age / Gender:</span>
+                                    <strong class="text-dark">{{ donor.age }} Years &bull; {{ donor.gender }}</strong>
+                                </div>
+                                <div class="col-6">
+                                    <span class="text-muted d-block">District / Locality:</span>
+                                    <strong class="text-dark">{{ donor.city }}, East Singhbhum, Jharkhand</strong>
+                                </div>
+                                <div class="col-6">
+                                    <span class="text-muted d-block">Lifetime Transfusion Count:</span>
+                                    <strong class="text-danger">{{ donor.total_donations }} Certified Donation{{ donor.total_donations|pluralize }}</strong>
+                                </div>
+                                <div class="col-6">
+                                    <span class="text-muted d-block">Clinical Eligibility:</span>
+                                    {% if is_eligible %}
+                                        <span class="badge bg-success text-white"><i class="bi bi-check-circle-fill me-1"></i>Fit &amp; Active</span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark"><i class="bi bi-clock-history me-1"></i>Post-Donation Rest ({{ days_until_eligible }}d)</span>
+                                    {% endif %}
+                                </div>
+                                <div class="col-12 pt-2 border-top">
+                                    <span class="text-muted d-block">Accrediting Nodal Hospital:</span>
+                                    <span class="text-dark fw-semibold">Tata Main Hospital (TMH) &bull; MGM Medical College Hospital Central Blood Bank</span>
+                                </div>
+                                <div class="col-12">
+                                    <span class="text-muted d-block">Verification Security Timestamp:</span>
+                                    <span class="font-monospace text-secondary">{{ verification_time }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Formal Signatures & QR Section -->
+                        <div class="row align-items-end pt-3 border-top g-3">
+                            <div class="col-6 text-center">
+                                <div class="p-2 border rounded-3 d-inline-block bg-white shadow-sm mb-1 position-relative">
+                                    {% if qr_code_base64 %}
+                                    <img src="{{ qr_code_base64 }}" 
+                                         alt="Tamper-proof certificate QR" 
+                                         title="Scan to verify official medical certificate"
+                                         style="width: 85px; height: 85px; image-rendering: pixelated; display: block;"
+                                         class="mx-auto">
+                                    {% else %}
+                                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ qr_payload|urlencode }}" 
+                                         alt="Tamper-proof certificate QR" 
+                                         style="width: 85px; height: 85px; image-rendering: pixelated; display: block;"
+                                         class="mx-auto">
+                                    {% endif %}
+                                </div>
+                                <div class="d-block">
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill font-monospace" style="font-size: 0.65rem;">
+                                        <i class="bi bi-shield-check me-1"></i>SECURE QR VERIFIED
+                                    </span>
+                                </div>
+                                <small class="d-block text-muted font-monospace mt-1" style="font-size: 0.65rem;">SCAN TO VERIFY AUTHENTICITY</small>
+                            </div>
+                            <div class="col-6 text-center">
+                                <div class="border-bottom border-dark border-opacity-50 pb-1 mb-1 mx-auto" style="max-width: 180px;">
+                                    <span class="font-serif fw-bold text-dark d-block" style="font-style: italic; font-size: 1.15rem; color: #1e3a8a;">Dr. A. K. Sen</span>
+                                </div>
+                                <small class="text-dark fw-bold d-block" style="font-size: 0.72rem;">Chief Medical Officer (CMO)</small>
+                                <small class="text-muted d-block" style="font-size: 0.65rem;">East Singhbhum Health Authority</small>
+                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill mt-1" style="font-size: 0.65rem;">
+                                    <i class="bi bi-patch-check-fill me-1"></i>Official Seal Attached
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons (Hidden on Print) -->
+                        <div class="d-flex gap-2 justify-content-center mt-4 no-print">
+                            <button type="button" class="btn btn-danger fw-bold rounded-pill px-4 shadow-sm" onclick="window.print()" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                                <i class="bi bi-printer-fill me-1"></i> Print / Download Certificate (PDF)
+                            </button>
+                            <a href="{% url 'dashboard_donor' %}" class="btn btn-outline-dark rounded-pill px-4">
+                                <i class="bi bi-arrow-left me-1"></i> Donor Dashboard
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Card Footer Note -->
+                    <div class="bg-light p-3 text-center border-top text-muted small no-print">
+                        <i class="bi bi-shield-lock-fill text-danger me-1"></i> Official Document issued under Section 19 of the National Blood Policy &bull; East Singhbhum Registry Node
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

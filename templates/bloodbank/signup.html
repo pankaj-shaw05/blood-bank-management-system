@@ -1,0 +1,361 @@
+{% extends 'bloodbank/base.html' %}
+{% load static %}
+
+{% block title %}Register | LifeStream Blood Bank Management System{% endblock %}
+
+{% block content %}
+<!-- AUTHENTICATION CONTAINER -->
+<div class="auth-wrapper">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xl-11">
+                <div class="auth-card">
+                    <div class="row g-0">
+                        <!-- SIDEBAR ELIGIBILITY CHECKLIST -->
+                        <div class="col-lg-5 auth-sidebar" id="authSidebar">
+                            <div>
+                                <div class="badge-pulse bg-danger text-white mb-3" id="sidebarBadge">
+                                    <i class="bi bi-heart-pulse-fill me-1"></i> Voluntary Registry
+                                </div>
+                                <h3 class="fw-bold mb-3" id="sidebarTitle">Become a Registered Life Saver</h3>
+                                <p class="text-white-50 small mb-4" id="sidebarDesc">
+                                    Joining our national voluntary blood network takes less than 2 minutes and puts you on standby to save lives during hospital emergencies in your neighborhood.
+                                </p>
+
+                                <!-- Donor Eligibility Checklist -->
+                                <div class="p-3 rounded-3 bg-white bg-opacity-10 border border-white border-opacity-25 mb-3" id="donorEligibilityBox">
+                                    <h6 class="text-white fw-bold mb-3"><i class="bi bi-check2-circle text-danger me-2"></i>General Donor Eligibility:</h6>
+                                    <ul class="list-unstyled small text-white-50 mb-0">
+                                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Age between 18 and 65 years</li>
+                                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Minimum weight of 45–50 kg</li>
+                                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Hemoglobin level ≥ 12.5 g/dl</li>
+                                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>No major surgery in past 6 months</li>
+                                        <li><i class="bi bi-check-circle-fill text-success me-2"></i>Gap of at least 90 days from last donation</li>
+                                    </ul>
+                                </div>
+
+                                <!-- Hospital Verification Checklist (shown when Hospital is selected) -->
+                                <div class="p-3 rounded-3 bg-white bg-opacity-10 border border-white border-opacity-25 mb-3" id="hospitalEligibilityBox" style="display: none;">
+                                    <h6 class="text-white fw-bold mb-3"><i class="bi bi-hospital text-warning me-2"></i>Hospital Facility Guidelines:</h6>
+                                    <ul class="list-unstyled small text-white-50 mb-0">
+                                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Verified healthcare facility within East Singhbhum</li>
+                                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>24/7 emergency admission &amp; blood intake</li>
+                                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Direct integration with district dispatch grid</li>
+                                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Authorized medical representative sign-off</li>
+                                        <li><i class="bi bi-check-circle-fill text-success me-2"></i>Instant emergency requisition broadcast</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="pt-4 border-top border-white border-opacity-25 small text-white-50">
+                                <i class="bi bi-shield-lock-fill text-success me-1"></i> Your personal contact number is kept safe &amp; strictly used for emergency medical cross-matching.
+                            </div>
+                        </div>
+
+                        <!-- REGISTRATION FORM CONTAINER -->
+                        <div class="col-lg-7 auth-form-container">
+                            <div class="mb-4">
+                                <h3 class="fw-bold mb-1">Create an Account</h3>
+                                <p class="text-muted small">Register as a voluntary donor or medical institution representative.</p>
+                            </div>
+
+                            <!-- Role Dropdown Selector (ONLY Donor & Hospital) -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small text-muted">I am registering as: <span class="text-danger">*</span></label>
+                                <select class="form-select fw-semibold" id="signupRoleSelect" name="role_selector" required>
+                                    <option value="Donor" {% if active_role != 'HOSPITAL' %}selected{% endif %}>Voluntary Blood Donor</option>
+                                    <option value="Hospital" {% if active_role == 'HOSPITAL' %}selected{% endif %}>Hospital / Healthcare Facility</option>
+                                </select>
+                            </div>
+
+                            <!-- DONOR SIGNUP FORM -->
+                            <form method="POST" action="{% url 'signup' %}" id="donorSignupForm" {% if active_role == 'HOSPITAL' %}style="display: none;"{% endif %}>
+                                {% csrf_token %}
+                                <input type="hidden" name="role" value="DONOR">
+
+                                <!-- Full Name & Email -->
+                                <div class="row g-2 mb-3">
+                                    <div class="col-sm-6">
+                                        <label class="form-label fw-bold small">Full Name <span class="text-danger">*</span></label>
+                                        {{ donor_form.full_name }}
+                                        {% if donor_form.full_name.errors %}<div class="text-danger small">{{ donor_form.full_name.errors.0 }}</div>{% endif %}
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label class="form-label fw-bold small">Email Address <span class="text-danger">*</span></label>
+                                        {{ donor_form.email }}
+                                        {% if donor_form.email.errors %}<div class="text-danger small">{{ donor_form.email.errors.0 }}</div>{% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Phone & City -->
+                                <div class="row g-2 mb-3">
+                                    <div class="col-sm-6">
+                                        <label class="form-label fw-bold small">Mobile Phone <span class="text-danger">*</span></label>
+                                        {{ donor_form.phone }}
+                                        {% if donor_form.phone.errors %}<div class="text-danger small">{{ donor_form.phone.errors.0 }}</div>{% endif %}
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label class="form-label fw-bold small">City / Town <span class="text-danger">*</span></label>
+                                        {{ donor_form.city }}
+                                        {% if donor_form.city.errors %}<div class="text-danger small">{{ donor_form.city.errors.0 }}</div>{% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Donor-Specific Fields -->
+                                <div class="donor-only-field p-3 bg-light rounded-3 mb-3 border">
+                                    <div class="row g-2">
+                                        <div class="col-sm-4">
+                                            <label class="form-label fw-bold small">Blood Group <span class="text-danger">*</span></label>
+                                            {{ donor_form.blood_group }}
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <label class="form-label fw-bold small">Age (18–65) <span class="text-danger">*</span></label>
+                                            {{ donor_form.age }}
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <label class="form-label fw-bold small">Gender <span class="text-danger">*</span></label>
+                                            {{ donor_form.gender }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Passwords -->
+                                <div class="row g-2 mb-3">
+                                    <div class="col-sm-6">
+                                        <label class="form-label fw-bold small">Create Password <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <input type="password" name="password" class="form-control" id="donorPasswordInput" placeholder="Min. 6 chars" required>
+                                            <button class="btn btn-light border password-toggle-btn" type="button" data-target="donorPasswordInput" aria-label="Toggle password view">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                        </div>
+                                        {% if donor_form.password.errors %}<div class="text-danger small">{{ donor_form.password.errors.0 }}</div>{% endif %}
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label class="form-label fw-bold small">Confirm Password <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <input type="password" name="confirm_password" class="form-control" id="donorConfirmPasswordInput" placeholder="Repeat password" required>
+                                            <button class="btn btn-light border password-toggle-btn" type="button" data-target="donorConfirmPasswordInput" aria-label="Toggle password view">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                        </div>
+                                        {% if donor_form.confirm_password.errors %}<div class="text-danger small">{{ donor_form.confirm_password.errors.0 }}</div>{% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Agreement Checkbox -->
+                                <div class="mb-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="donorTerms" required checked>
+                                        <label class="form-check-label small text-muted" for="donorTerms">
+                                            I confirm I meet the health eligibility criteria and agree to voluntary notification for emergency blood requisitions under <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#termsEthicsModal" class="text-danger text-decoration-none fw-semibold">Terms &amp; Medical Ethics Policy</a>.
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary-red w-100 py-3 mb-3 fs-6">
+                                    <i class="bi bi-check-circle-fill me-1"></i> Complete Registration
+                                </button>
+                            </form>
+
+                            <!-- HOSPITAL SIGNUP FORM -->
+                            <form method="POST" action="{% url 'signup' %}" id="hospitalSignupForm" {% if active_role != 'HOSPITAL' %}style="display: none;"{% endif %}>
+                                {% csrf_token %}
+                                <input type="hidden" name="role" value="HOSPITAL">
+
+                                <!-- Hospital Name & Email -->
+                                <div class="row g-2 mb-3">
+                                    <div class="col-sm-6">
+                                        <label class="form-label fw-bold small">Hospital / Facility Name <span class="text-danger">*</span></label>
+                                        {{ hospital_form.hospital_name }}
+                                        {% if hospital_form.hospital_name.errors %}<div class="text-danger small">{{ hospital_form.hospital_name.errors.0 }}</div>{% endif %}
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label class="form-label fw-bold small">Official Email Address <span class="text-danger">*</span></label>
+                                        {{ hospital_form.email }}
+                                        {% if hospital_form.email.errors %}<div class="text-danger small">{{ hospital_form.email.errors.0 }}</div>{% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Phone & Locality -->
+                                <div class="row g-2 mb-3">
+                                    <div class="col-sm-6">
+                                        <label class="form-label fw-bold small">Official Phone <span class="text-danger">*</span></label>
+                                        {{ hospital_form.phone }}
+                                        {% if hospital_form.phone.errors %}<div class="text-danger small">{{ hospital_form.phone.errors.0 }}</div>{% endif %}
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label class="form-label fw-bold small">City / Locality (East Singhbhum) <span class="text-danger">*</span></label>
+                                        {{ hospital_form.locality }}
+                                        {% if hospital_form.locality.errors %}<div class="text-danger small">{{ hospital_form.locality.errors.0 }}</div>{% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Hospital-Specific Box -->
+                                <div class="p-3 bg-light rounded-3 mb-3 border">
+                                    <div class="row g-2 mb-2">
+                                        <div class="col-sm-6">
+                                            <label class="form-label fw-bold small">Facility Category <span class="text-danger">*</span></label>
+                                            {{ hospital_form.category }}
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <label class="form-label fw-bold small">Total Bed Capacity <span class="text-danger">*</span></label>
+                                            {{ hospital_form.beds }}
+                                        </div>
+                                    </div>
+                                    <div class="form-check form-switch mt-2">
+                                        {{ hospital_form.has_blood_bank }}
+                                        <label class="form-check-label small fw-bold text-dark" for="id_has_blood_bank">
+                                            Licensed In-House Blood Bank / Transfusion Facility Available
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Passwords -->
+                                <div class="row g-2 mb-3">
+                                    <div class="col-sm-6">
+                                        <label class="form-label fw-bold small">Create Password <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <input type="password" name="password" class="form-control" id="hospitalPasswordInput" placeholder="Min. 6 chars" required>
+                                            <button class="btn btn-light border password-toggle-btn" type="button" data-target="hospitalPasswordInput" aria-label="Toggle password view">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                        </div>
+                                        {% if hospital_form.password.errors %}<div class="text-danger small">{{ hospital_form.password.errors.0 }}</div>{% endif %}
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label class="form-label fw-bold small">Confirm Password <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <input type="password" name="confirm_password" class="form-control" id="hospitalConfirmPasswordInput" placeholder="Repeat password" required>
+                                            <button class="btn btn-light border password-toggle-btn" type="button" data-target="hospitalConfirmPasswordInput" aria-label="Toggle password view">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                        </div>
+                                        {% if hospital_form.confirm_password.errors %}<div class="text-danger small">{{ hospital_form.confirm_password.errors.0 }}</div>{% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Agreement Checkbox -->
+                                <div class="mb-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="hospitalTerms" required checked>
+                                        <label class="form-check-label small text-muted" for="hospitalTerms">
+                                            I confirm I represent this healthcare facility and agree to coordinate emergency requisitions under <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#termsEthicsModal" class="text-danger text-decoration-none fw-semibold">Terms &amp; Medical Ethics Policy</a>.
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary-red w-100 py-3 mb-3 fs-6">
+                                    <i class="bi bi-hospital me-1"></i> Complete Hospital Registration
+                                </button>
+                            </form>
+
+                            <div class="text-center pt-2">
+                                <span class="text-muted small">Already have a registered account? </span>
+                                <a href="{% url 'login' %}" class="fw-bold text-danger text-decoration-none small">Sign In Here</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const roleSelect = document.getElementById('signupRoleSelect');
+    const donorForm = document.getElementById('donorSignupForm');
+    const hospitalForm = document.getElementById('hospitalSignupForm');
+    const sidebarBadge = document.getElementById('sidebarBadge');
+    const sidebarTitle = document.getElementById('sidebarTitle');
+    const sidebarDesc = document.getElementById('sidebarDesc');
+    const donorBox = document.getElementById('donorEligibilityBox');
+    const hospitalBox = document.getElementById('hospitalEligibilityBox');
+
+    function updateRoleView() {
+        if (!roleSelect) return;
+        const val = roleSelect.value;
+        if (val === 'Hospital') {
+            donorForm.style.display = 'none';
+            hospitalForm.style.display = 'block';
+            sidebarBadge.innerHTML = '<i class="bi bi-hospital me-1"></i> Hospital Registry';
+            sidebarTitle.textContent = 'Partner Healthcare Facility';
+            sidebarDesc.textContent = 'Register your hospital or clinic to dispatch rapid blood requisitions and manage transfusion requirements across East Singhbhum.';
+            if (donorBox) donorBox.style.display = 'none';
+            if (hospitalBox) hospitalBox.style.display = 'block';
+        } else {
+            donorForm.style.display = 'block';
+            hospitalForm.style.display = 'none';
+            sidebarBadge.innerHTML = '<i class="bi bi-heart-pulse-fill me-1"></i> Voluntary Registry';
+            sidebarTitle.textContent = 'Become a Registered Life Saver';
+            sidebarDesc.textContent = 'Joining our national voluntary blood network takes less than 2 minutes and puts you on standby to save lives during hospital emergencies in your neighborhood.';
+            if (donorBox) donorBox.style.display = 'block';
+            if (hospitalBox) hospitalBox.style.display = 'none';
+        }
+    }
+
+    if (roleSelect) {
+        roleSelect.addEventListener('change', updateRoleView);
+        updateRoleView();
+    }
+
+    // Password visibility toggle
+    document.querySelectorAll('.password-toggle-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const targetInput = document.getElementById(targetId);
+            const icon = this.querySelector('i');
+            if (targetInput) {
+                if (targetInput.type === 'password') {
+                    targetInput.type = 'text';
+                    icon.classList.remove('bi-eye');
+                    icon.classList.add('bi-eye-slash');
+                } else {
+                    targetInput.type = 'password';
+                    icon.classList.remove('bi-eye-slash');
+                    icon.classList.add('bi-eye');
+                }
+            }
+        });
+    });
+});
+</script>
+<!-- TERMS & MEDICAL ETHICS POLICY MODAL -->
+<div class="modal fade" id="termsEthicsModal" tabindex="-1" aria-labelledby="termsEthicsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header bg-dark text-white p-3">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-shield-check text-danger fs-5"></i>
+                    <h5 class="modal-title fw-bold mb-0" id="termsEthicsModalLabel">Terms &amp; Medical Ethics Policy</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 small text-secondary">
+                <div class="alert alert-danger bg-danger bg-opacity-10 border-danger border-opacity-25 rounded-3 mb-3 text-dark">
+                    <i class="bi bi-info-circle-fill text-danger me-1"></i>
+                    <strong>National Blood Transfusion Council (NBTC) &amp; Drugs and Cosmetics Act Compliance</strong>
+                </div>
+
+                <h6 class="fw-bold text-dark mb-1">1. Voluntary Non-Remunerated Blood Donation</h6>
+                <p class="mb-3">All blood donations facilitated via LifeStream are strictly voluntary, humanitarian, and non-commercial. Selling or trading blood units is illegal under Indian law and strictly forbidden on this platform.</p>
+
+                <h6 class="fw-bold text-dark mb-1">2. Donor Eligibility &amp; Safety Protocol</h6>
+                <p class="mb-3">Donors must be aged 18–65 years, weight &ge; 45 kg, with hemoglobin &ge; 12.5 g/dL. A mandatory deferral period of 90 days for males and 120 days for females between whole blood donations must be honored.</p>
+
+                <h6 class="fw-bold text-dark mb-1">3. Accredited Healthcare Facilities Only</h6>
+                <p class="mb-3">Only verified healthcare institutions and certified blood storage units located within the designated East Singhbhum district boundary may requisition units or manage reserves through this portal.</p>
+
+                <h6 class="fw-bold text-dark mb-1">4. Data Privacy &amp; Credential Protection</h6>
+                <p class="mb-0">All donor personal telemetry and contact credentials are encrypted. Contact details are only shared during verified critical or emergency requisitions to protect privacy.</p>
+            </div>
+            <div class="modal-footer bg-light p-3 border-0">
+                <button type="button" class="btn btn-primary-red btn-sm px-4 rounded-pill fw-bold" data-bs-dismiss="modal">
+                    <i class="bi bi-check2 me-1"></i> I Understand &amp; Agree
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
