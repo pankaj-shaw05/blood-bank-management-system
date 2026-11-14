@@ -101,27 +101,6 @@
                                 </button>
                             </form>
 
-                            <!-- ONE-CLICK DEMO ACCOUNTS HELPER (DONOR & HOSPITAL ONLY) -->
-                            <div class="p-3 bg-light rounded-3 border mb-3">
-                                <div class="d-flex align-items-center justify-content-between mb-2">
-                                    <span class="small fw-bold text-muted"><i class="bi bi-lightning-charge-fill text-warning me-1"></i> Quick Demo Test Autofill:</span>
-                                </div>
-                                <div class="d-flex flex-wrap gap-2">
-                                    <button type="button" class="btn btn-outline-dark btn-sm flex-grow-1 btn-fill-demo fw-bold" data-user="admin" data-pass="admin" data-role="Admin">
-                                        <i class="bi bi-shield-lock-fill me-1"></i> Admin (admin / admin)
-                                    </button>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm flex-grow-1 btn-fill-demo" data-user="donor" data-pass="donor123" data-role="Donor">
-                                        <i class="bi bi-person me-1"></i> Donor (donor / donor123)
-                                    </button>
-                                    <button type="button" class="btn btn-outline-danger btn-sm flex-grow-1 btn-fill-demo fw-bold" data-user="mgm" data-pass="hospital123" data-role="Hospital">
-                                        <i class="bi bi-hospital me-1"></i> MGM (mgm / hospital123)
-                                    </button>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm flex-grow-1 btn-fill-demo" data-user="tata_hospital" data-pass="hospital123" data-role="Hospital">
-                                        <i class="bi bi-hospital me-1"></i> TMH (tata_hospital)
-                                    </button>
-                                </div>
-                            </div>
-
                             <div class="text-center pt-2">
                                 <span class="text-muted small">Don't have an account yet? </span>
                                 <a href="{% url 'signup' %}" class="fw-bold text-danger text-decoration-none small">Register Here</a>
@@ -136,30 +115,6 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Quick Demo Autofill button handler
-    const demoBtns = document.querySelectorAll('.btn-fill-demo');
-    const userInput = document.getElementById('loginUsername');
-    const passInput = document.getElementById('loginPassword');
-    const roleDonor = document.getElementById('roleDonor');
-    const roleHospital = document.getElementById('roleHospital');
-
-    demoBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const user = this.getAttribute('data-user');
-            const pass = this.getAttribute('data-pass');
-            const role = this.getAttribute('data-role');
-
-            if (userInput) userInput.value = user;
-            if (passInput) passInput.value = pass;
-
-            if (role === 'Donor' && roleDonor) {
-                roleDonor.checked = true;
-            } else if (role === 'Hospital' && roleHospital) {
-                roleHospital.checked = true;
-            }
-        });
-    });
-
     // Password visibility toggle
     document.querySelectorAll('.password-toggle-btn').forEach(btn => {
         btn.addEventListener('click', function() {
