@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.cache import never_cache
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
 from django.db.models import Sum, Q
@@ -50,6 +51,7 @@ def generate_qr_base64(data_text):
 # PUBLIC PAGES (ALL DATA DYNAMICALLY FETCHED FROM BACKEND)
 # ============================================================
 
+@never_cache
 def home(request):
     """Dynamic Homepage with live database counters & real-time telemetry"""
     total_donors = DonorProfile.objects.filter(verified=True).count()
@@ -74,6 +76,7 @@ def home(request):
     return render(request, 'bloodbank/home.html', context)
 
 
+@never_cache
 def donors_list(request):
     """Search & Filter Donors strictly from Django database"""
     donors = DonorProfile.objects.filter(verified=True)
@@ -291,6 +294,7 @@ def request_blood(request):
     return render(request, 'bloodbank/request_blood.html', context)
 
 
+@never_cache
 def inventory_view(request):
     """Live Blood Bank Component Inventory fetched from database"""
     items = BloodInventory.objects.all().order_by('blood_group')
@@ -313,6 +317,7 @@ def inventory_view(request):
     return render(request, 'bloodbank/inventory.html', context)
 
 
+@never_cache
 def camps_view(request):
     """Donation Camps & Drives with working 1-click registration"""
     camps = DonationCamp.objects.all().order_by('date')
@@ -535,6 +540,7 @@ def dashboard_redirect(request):
 # ROLE-BASED DASHBOARDS (DONOR, HOSPITAL, ADMIN)
 # ============================================================
 
+@never_cache
 @login_required
 def dashboard_donor(request):
     """Donor Personal Dashboard: History, Availability Toggle, Matching Requests"""
@@ -704,6 +710,7 @@ def pledge_donation(request):
     return redirect('dashboard_donor')
 
 
+@never_cache
 @login_required
 def dashboard_hospital(request):
     """Hospital Portal: Requisition Tracking, Local Donors, In-House Status"""
@@ -748,6 +755,7 @@ def dashboard_hospital(request):
     return render(request, 'bloodbank/dashboard_hospital.html', context)
 
 
+@never_cache
 @login_required
 def dashboard_admin(request):
     """System-Wide Admin Command Dashboard"""
@@ -877,6 +885,7 @@ def verify_donor_card(request, donor_id):
     return render(request, 'bloodbank/verify_donor.html', context)
 
 
+@never_cache
 def api_analytics(request):
     """REST API endpoint for real-time system analytics and BI charts"""
     inventory_items = BloodInventory.objects.all().order_by('blood_group')
@@ -968,6 +977,7 @@ def delete_blood_request(request, req_id):
     return redirect('request_blood')
 
 
+@never_cache
 @login_required
 def toggle_donor_verification(request, donor_id):
     """Admin-only: Toggle medical verification for a donor"""
@@ -985,6 +995,7 @@ def toggle_donor_verification(request, donor_id):
     return redirect(request.META.get('HTTP_REFERER', 'dashboard_admin'))
 
 
+@never_cache
 @login_required
 def delete_donor(request, donor_id):
     """Admin-only: Permanently delete a donor and linked account"""
@@ -1004,6 +1015,7 @@ def delete_donor(request, donor_id):
     return redirect(request.META.get('HTTP_REFERER', 'dashboard_admin'))
 
 
+@never_cache
 @login_required
 def toggle_hospital_verification(request, hospital_id):
     """Admin-only: Toggle accreditation & verification for a healthcare facility"""
@@ -1021,6 +1033,7 @@ def toggle_hospital_verification(request, hospital_id):
     return redirect(request.META.get('HTTP_REFERER', 'dashboard_admin'))
 
 
+@never_cache
 @login_required
 def delete_hospital(request, hospital_id):
     """Admin-only: Permanently delete a healthcare facility and linked account"""
