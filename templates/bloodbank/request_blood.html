@@ -796,8 +796,10 @@
             scrollWheelZoom: false
         });
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors | LifeStream Geofence'
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap contributors &copy; CARTO | LifeStream Geofence',
+            subdomains: 'abcd',
+            maxZoom: 20
         }).addTo(hospitalMap);
 
         // Fetch Geofence Polygon from Django API
