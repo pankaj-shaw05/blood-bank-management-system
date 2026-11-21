@@ -1,0 +1,178 @@
+{% extends 'bloodbank/base.html' %}
+{% load static %}
+
+{% block title %}System Administration Portal | LifeStream Blood Bank{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-auth-wrapper {
+        min-height: calc(100vh - 180px);
+        background: linear-gradient(135deg, #0b1120 0%, #111827 50%, #1e1b4b 100%);
+        position: relative;
+        overflow: hidden;
+    }
+    .admin-auth-wrapper::before {
+        content: "";
+        position: absolute;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(220, 38, 38, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+        top: -150px;
+        right: -150px;
+        pointer-events: none;
+    }
+    .admin-auth-wrapper::after {
+        content: "";
+        position: absolute;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(37, 99, 235, 0.1) 0%, rgba(0, 0, 0, 0) 70%);
+        bottom: -150px;
+        left: -150px;
+        pointer-events: none;
+    }
+    .admin-auth-card {
+        background: rgba(17, 24, 39, 0.85);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 30px rgba(220, 38, 38, 0.15);
+    }
+    .admin-shield-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, rgba(220, 38, 38, 0.2) 0%, rgba(153, 27, 27, 0.3) 100%);
+        border: 1px solid rgba(239, 68, 68, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        box-shadow: 0 10px 25px rgba(220, 38, 38, 0.25);
+    }
+    .admin-input-group .form-control {
+        background-color: rgba(15, 23, 42, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: #f8fafc;
+        padding: 0.75rem 1rem;
+    }
+    .admin-input-group .form-control:focus {
+        background-color: rgba(15, 23, 42, 0.95);
+        border-color: #ef4444;
+        box-shadow: 0 0 0 0.25rem rgba(239, 68, 68, 0.25);
+        color: #fff;
+    }
+    .admin-input-group .input-group-text {
+        background-color: rgba(15, 23, 42, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: #f87171;
+    }
+    .admin-submit-btn {
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+        border: none;
+        color: #fff;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 20px rgba(220, 38, 38, 0.3);
+    }
+    .admin-submit-btn:hover {
+        background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+        box-shadow: 0 12px 25px rgba(220, 38, 38, 0.45);
+        transform: translateY(-1px);
+        color: #fff;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="admin-auth-wrapper py-5 d-flex align-items-center">
+    <div class="container py-4 position-relative" style="z-index: 2;">
+        <div class="row justify-content-center">
+            <div class="col-lg-5 col-md-8 col-sm-11">
+                <div class="admin-auth-card p-4 p-md-5 text-white">
+                    
+                    <!-- ADMIN BADGE HEADER -->
+                    <div class="text-center mb-4">
+                        <div class="admin-shield-icon">
+                            <i class="bi bi-shield-lock-fill text-danger fs-1"></i>
+                        </div>
+                        <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50 text-uppercase fw-bold px-3 py-1 mb-2" style="letter-spacing: 1px; font-size: 0.72rem;">
+                            <i class="bi bi-lock-fill me-1"></i> Restricted Command Portal
+                        </span>
+                        <h3 class="fw-bold text-white mb-1">Central Administration</h3>
+                        <p class="text-slate-muted small mb-0">Authorized Personnel &amp; System Operators Only</p>
+                    </div>
+
+                    <!-- SECURITY NOTICE BADGE -->
+                    <div class="alert alert-dark bg-black bg-opacity-40 border-secondary border-opacity-25 rounded-3 py-2 px-3 small d-flex align-items-center gap-2 mb-4 text-slate-muted">
+                        <i class="bi bi-shield-check text-success fs-5"></i>
+                        <span>Secure Terminal: All sessions are encrypted and logged for regulatory auditing.</span>
+                    </div>
+
+                    <!-- ADMIN LOGIN FORM -->
+                    <form method="POST" action="{% url 'admin_login' %}" id="adminLoginForm">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label class="form-label text-slate-muted small fw-bold" for="adminUsername">Administrator ID or Email</label>
+                            <div class="input-group admin-input-group">
+                                <span class="input-group-text"><i class="bi bi-person-fill-lock"></i></span>
+                                <input type="text" name="username" class="form-control" id="adminUsername" 
+                                       placeholder="e.g. admin or admin@lifestream.org" 
+                                       value="{{ entered_username|default:'' }}"
+                                       required autofocus autocomplete="username" autocapitalize="none" spellcheck="false">
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label text-slate-muted small fw-bold" for="adminPassword">Master Security Password</label>
+                            <div class="input-group admin-input-group">
+                                <span class="input-group-text"><i class="bi bi-key-fill"></i></span>
+                                <input type="password" name="password" class="form-control" id="adminPassword" 
+                                       placeholder="Enter administrator password" 
+                                       required autocomplete="current-password">
+                                <button class="btn btn-outline-secondary border-start-0 text-slate-muted" type="button" id="adminPasswordToggle" aria-label="Toggle password view">
+                                    <i class="bi bi-eye" id="toggleIcon"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn admin-submit-btn w-100 py-3 mb-3 fs-6">
+                            <i class="bi bi-box-arrow-in-right me-2"></i> Authenticate &amp; Access Control Room
+                        </button>
+                    </form>
+
+                    <!-- FOOTER NAVIGATION -->
+                    <div class="text-center pt-3 border-top border-secondary border-opacity-25">
+                        <a href="{% url 'login' %}" class="text-decoration-none text-slate-muted small d-inline-flex align-items-center gap-1 hover-text-white">
+                            <i class="bi bi-arrow-left"></i> Switch to Public Portal (Donors &amp; Hospitals)
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleBtn = document.getElementById('adminPasswordToggle');
+    const pwdInput = document.getElementById('adminPassword');
+    const toggleIcon = document.getElementById('toggleIcon');
+
+    if (toggleBtn && pwdInput) {
+        toggleBtn.addEventListener('click', function() {
+            const isPassword = pwdInput.getAttribute('type') === 'password';
+            pwdInput.setAttribute('type', isPassword ? 'text' : 'password');
+            if (toggleIcon) {
+                toggleIcon.classList.toggle('bi-eye', !isPassword);
+                toggleIcon.classList.toggle('bi-eye-slash', isPassword);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

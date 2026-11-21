@@ -424,6 +424,46 @@ def login_view(request):
     return render(request, 'bloodbank/login.html', {'form': form})
 
 
+def admin_login_view(request):
+    """Dedicated Secure Admin Command Center Login Portal"""
+    if request.user.is_authenticated:
+        if request.user.is_superuser or getattr(getattr(request.user, 'profile', None), 'role', None) == 'ADMIN':
+            return redirect('dashboard_admin')
+        return redirect('dashboard_redirect')
+
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
+
+        if not username or not password:
+            messages.error(request, "Please enter both Administrator ID / Email and Password.")
+            return render(request, 'bloodbank/admin_login.html')
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            # Enforce that only Admin / Superuser can enter via this portal
+            if user.is_superuser or getattr(getattr(user, 'profile', None), 'role', None) == 'ADMIN':
+                login(request, user)
+                messages.success(request, f"Welcome to Central Command, {user.first_name or user.username}!")
+                return redirect('dashboard_admin')
+            else:
+                messages.error(
+                    request,
+                    "Access Denied: This terminal is strictly restricted to System Administrators. "
+                    "Donors and Hospital representatives please sign in via the Public Portal."
+                )
+                return render(request, 'bloodbank/admin_login.html', {'entered_username': username})
+        else:
+            messages.error(
+                request,
+                "Authentication failed: Invalid administrator username/email or password. Please verify your credentials."
+            )
+            return render(request, 'bloodbank/admin_login.html', {'entered_username': username})
+
+    return render(request, 'bloodbank/admin_login.html')
+
+
 def signup_view(request):
     """Registration for Donors and Hospitals"""
     if request.user.is_authenticated:

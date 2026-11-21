@@ -391,4 +391,29 @@ class BloodBankTestCase(TestCase):
         self.assertEqual(del_res.status_code, 302)
         self.assertFalse(Hospital.objects.filter(id=test_hosp.id).exists())
 
+    def test_dedicated_admin_login(self):
+        """Verify dedicated admin portal authentication, rejection of non-admins, and redirection"""
+        # GET page
+        get_res = self.client.get(reverse('admin_login'))
+        self.assertEqual(get_res.status_code, 200)
+        self.assertContains(get_res, "Restricted Command Portal")
+
+        # Admin login with correct credentials
+        post_res = self.client.post(reverse('admin_login'), {
+            'username': 'admin',
+            'password': 'adminpassword'
+        })
+        self.assertEqual(post_res.status_code, 302)
+        self.assertRedirects(post_res, reverse('dashboard_admin'))
+        self.client.logout()
+
+        # Non-admin user (donor) trying to log into admin portal should be rejected
+        donor_post = self.client.post(reverse('admin_login'), {
+            'username': 'rahul',
+            'password': 'password123'
+        })
+        self.assertEqual(donor_post.status_code, 200)
+        self.assertContains(donor_post, "Access Denied")
+
+
 
