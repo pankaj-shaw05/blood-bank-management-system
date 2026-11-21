@@ -178,10 +178,14 @@ if not DEBUG:
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = 'DENY'
 
-# Authentication URLs
+# Authentication URLs & Backends
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard_redirect'
 LOGOUT_REDIRECT_URL = 'home'
+
+AUTHENTICATION_BACKENDS = [
+    'bloodbank.backends.FlexibleAuthBackend',
+]
 
 # Bootstrap Alert Message Tags Mapping
 from django.contrib.messages import constants as messages
